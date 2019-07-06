@@ -1,3 +1,4 @@
-#!/usr/bin/env bash -l
+#!/usr/bin/env bash
 
+. "$NVM_DIR/nvm.sh"
 nvm exec --silent $(if [ -f '.nvmrc' ]; then cat '.nvmrc'; else printf 'default'; fi) $@
