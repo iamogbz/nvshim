@@ -1,6 +1,6 @@
-# OSS Boilerplate
+# Project Name
 
-Simple package with some preconfigurations
+Project description
 
 ## Shell Commands
 
