@@ -1,9 +1,7 @@
-# Project Name
+# NVM Shim
 
-Project description
+Automagically use the correct version of node with [`nvm exec`](https://github.com/nvm-sh/nvm#usage) functionality.
 
-## Shell Commands
+> **No more `nvm use`**
 
-```sh
-make upstream     # adds an upstream target to fetch updates from the oss-boilerplate repo
-```
+This will use existing [`.nvmrc`](https://github.com/nvm-sh/nvm#nvmrc) file, falling back to the [`nvm alias default`](https://github.com/nvm-sh/nvm#usage-1) version if no config detected.
