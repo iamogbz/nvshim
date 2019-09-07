@@ -74,7 +74,7 @@ def parse_version(version: str) -> semver.VersionInfo:
 @functools.lru_cache(maxsize=None)
 def resolve_alias(
     name: str, alias_mapping: AliasMapping
-) -> (str, [str], semver.VersionInfo):
+) -> (semver.VersionInfo, str, [str]):
     seen_in_order = []
     seen = set()
     while name in alias_mapping and name not in seen:
@@ -82,7 +82,7 @@ def resolve_alias(
         seen_in_order.append(name)
         seen.add(name)
 
-    return name, seen_in_order, parse_version(name)
+    return parse_version(name), name, seen_in_order
 
 
 def resolve_nvm_aliases(nvm_aliases: AliasMapping):
@@ -90,7 +90,7 @@ def resolve_nvm_aliases(nvm_aliases: AliasMapping):
     for alias, version in nvm_aliases.items():
         version_info = parse_version(version)
         if not version_info:
-            _, __, version_info = resolve_alias(version, nvm_aliases)
+            version_info = resolve_alias(version, nvm_aliases)[0]
 
         if version_info:
             resolved_aliases[alias] = str(version_info)
