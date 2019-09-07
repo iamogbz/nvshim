@@ -59,8 +59,8 @@ build:
 lint:
 	black . --check
 
-.PHONY: lint-fix
-lint-fix:
+.PHONY: format
+format:
 	black .
 
 ifndef VERBOSE
