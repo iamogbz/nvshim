@@ -48,7 +48,7 @@ def get_files(path: str) -> [str]:
         yield path
 
 
-def get_nvm_aliases_dir(nvm_dir):
+def get_nvm_aliases_dir(nvm_dir: str) -> str:
     return os.path.join(nvm_dir, "alias")
 
 
@@ -75,6 +75,13 @@ def parse_version(version: str) -> semver.VersionInfo:
 def resolve_alias(
     name: str, alias_mapping: AliasMapping
 ) -> (semver.VersionInfo, str, [str]):
+    """
+    Resolve an alias to a semantic version going through multiple mappings
+    
+    :param name: name of the version alias to resolve
+    :type alias_mapping: mapping of alias to version
+    :return: (semantic version info, alias name, list of aliases traversed)
+    """
     seen_in_order = []
     seen = set()
     while name in alias_mapping and name not in seen:
@@ -86,6 +93,9 @@ def resolve_alias(
 
 
 def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> AliasMapping:
+    """
+    Resolve all aliases in a mapping to their version info
+    """
     resolved_aliases = {}
     for alias, version in nvm_aliases.items():
         version_info = parse_version(version) or resolve_alias(version, nvm_aliases)[0]
@@ -96,7 +106,7 @@ def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> AliasMapping:
     return resolved_aliases
 
 
-def get_node_versions_dir(nvm_dir):
+def get_node_versions_dir(nvm_dir: str) -> str:
     return os.path.join(nvm_dir, "versions", "node")
 
 
@@ -105,6 +115,21 @@ def get_node_versions(node_versions_dir: str) -> VersionMapping:
         str(parse_version(v)): os.path.join(node_versions_dir, v, "bin")
         for v in os.listdir(node_versions_dir)
     }
+
+
+def get_nvmrc_path(exec_dir: str = "") -> str:
+    root_dir = os.path.abspath(os.sep)
+    current_dir = exec_dir
+    config_file = ".nvmrc"
+    config_found = False
+    while True:
+        current_config = os.path.join(current_dir, config_file)
+        config_found = os.path.exists(current_config)
+        if config_found or current_dir == root_dir:
+            break
+        current_dir = os.path.realpath(os.path.join(current_dir, "../"))
+
+    return current_config if config_found else None
 
 
 # get nvmrc or use default
@@ -118,3 +143,5 @@ if __name__ == "__main__":
     node_versions_dir = get_node_versions_dir(nvm_dir)
     node_versions = get_node_versions(node_versions_dir)
     print(node_versions)
+    nvmrc_path = get_nvmrc_path()
+    print(nvmrc_path)
