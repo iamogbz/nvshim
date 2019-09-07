@@ -143,7 +143,14 @@ def get_nvmrc_path(exec_dir: str = "") -> str:
     return current_config if config_found else None
 
 
-# get nvmrc or use default
+def get_nvmrc(nvmrc_path: str = None) -> str:
+    if nvmrc_path:
+        with open(nvmrc_path) as f:
+            return f.readline().strip()
+
+    return "default"
+
+
 # return path to node or npm
 if __name__ == "__main__":
     nvm_dir = get_nvm_dir()
@@ -156,3 +163,5 @@ if __name__ == "__main__":
     print(all_versions)
     nvmrc_path = get_nvmrc_path()
     print(nvmrc_path)
+    nvmrc = get_nvmrc(nvmrc_path)
+    print(nvmrc)
