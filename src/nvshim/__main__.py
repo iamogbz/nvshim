@@ -34,21 +34,26 @@ class EnvironmentVariable(Enum):
     NVM_DIR = "NVM_DIR"
 
 
-class Messages:
+class Message:
     @staticmethod
-    def _print_stylized(text, color):
-        print(stylize(text, color))
+    def _stylize(text: str, color: Color) -> str:
+        return stylize(text, color.value)
 
-    @staticmethod
-    def _print_error(text: str):
-        Messages._print_stylized(text, Color.ERROR)
+    @classmethod
+    def _print_stylized(cls, text: str, color: Color):
+        print(cls._stylize(text, color))
 
-    @staticmethod
-    def _print_notice(text: str):
-        Messages._print_stylized(text, Color.NOTICE)
+    @classmethod
+    def _print_error(cls, text: str):
+        cls._print_stylized(text, Color.ERROR)
 
-    def print_env_var_missing(name: str):
-        Messages._print_error(f"Environment variable '{name}' missing")
+    @classmethod
+    def _print_notice(cls, text: str):
+        cls._print_stylized(text, Color.NOTICE)
+
+    @classmethod
+    def print_env_var_missing(cls, env_var: EnvironmentVariable):
+        cls._print_error(f"Environment variable '{env_var.value}' missing")
 
     @staticmethod
     def print_found_version(nvmrc_path: str, version: str):
@@ -62,17 +67,17 @@ class Messages:
     def print_node_bin_file_does_not_exist(bin_path: str):
         print(f"No executable file found at '{bin_path}'")
 
-    @staticmethod
-    def print_version_not_installed(version: str):
-        Messages._print_error(f"N/A version 'v{version}' is not yet installed.\n")
+    @classmethod
+    def print_version_not_installed(cls, version: str):
+        cls._print_error(f"N/A version 'v{version}' is not yet installed.\n")
         print(
             "You need to run",
-            stylize(f"'nvm install v{version}'", Color.NOTICE),
+            cls._stylize(f"'nvm install v{version}'", Color.NOTICE),
             "to install it before using it.\n",
         )
         print(
             "Or set the environment variable",
-            stylize(f"'{EnvironmentVariable.AUTO_INSTALL}'", Color.NOTICE),
+            cls._stylize(f"'{EnvironmentVariable.AUTO_INSTALL.value}'", Color.NOTICE),
             "to auto install at run time.\n",
         )
 
@@ -84,16 +89,15 @@ def run(*args):
         exit(error.returncode)
 
 
-def get_env_var(name: EnvironmentVariable, raise_missing: bool = False) -> object:
-    env_var_name = name.value
+def get_env_var(env_var: EnvironmentVariable, raise_missing: bool = False) -> object:
     try:
-        return json.loads(os.environ[env_var_name])
+        return json.loads(os.environ[env_var.value])
     except KeyError:
         if raise_missing:
-            Messages.print_env_var_missing(env_var_name)
+            Message.print_env_var_missing(env_var)
             raise
     except json.decoder.JSONDecodeError:
-        return os.environ.get(env_var_name)
+        return os.environ.get(env_var.value)
 
 
 def get_nvm_dir() -> str:
@@ -211,7 +215,7 @@ def get_nvmrc(nvmrc_path: str = None) -> str:
     if nvmrc_path:
         with open(nvmrc_path) as f:
             version = str(parse_version(f.readline().strip()))
-            Messages.print_found_version(nvmrc_path, version)
+            Message.print_found_version(nvmrc_path, version)
             return version
 
     return "default"
@@ -222,14 +226,14 @@ def get_bin_path(version: str, node_versions: VersionMapping, bin_file: str):
         node_path = node_versions[version]
     except KeyError:
         if not is_auto_install_version_enabled():
-            Messages.print_version_not_installed(version)
+            Message.print_version_not_installed(version)
             exit(ErrorCode.VERSION_NOT_INSTALLED)
 
         run(["nvm install", version])
 
     bin_path = os.path.join(node_path, bin_file)
     if not os.path.exists(bin_path):
-        Messages.print_node_bin_file_does_not_exist(bin_path)
+        Message.print_node_bin_file_does_not_exist(bin_path)
         exit(ErrorCode.EXECUTABLE_NOT_FOUND)
 
     return bin_path
@@ -243,7 +247,7 @@ def get_args() -> [str]:
     try:
         [_, bin_file, *bin_args] = sys.argv
     except ValueError:
-        Messages.print_node_bin_file_not_provided()
+        Message.print_node_bin_file_not_provided()
         exit(ErrorCode.EXECUTABLE_NOT_GIVEN)
 
     return bin_file, bin_args
