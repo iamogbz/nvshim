@@ -1,3 +1,4 @@
+from enum import Enum, IntEnum
 import functools
 import json
 import os
@@ -8,16 +9,6 @@ from typing import Dict
 from colored import stylize, fg, bg, attr
 import semver
 
-COLOR_ERROR = fg("red")
-COLOR_NOTICE = fg("yellow")
-COLOR_RESET = attr("reset")
-
-ERROR_CODE_EXECUTABLE_NOT_GIVEN = 1000
-ERROR_CODE_EXECUTABLE_NOT_FOUND = 1002
-ERROR_CODE_VERSION_NOT_INSTALLED = 1001
-
-ENV_VAR_NVM_DIR = "NVM_DIR"
-ENV_VAR_AUTO_INSTALL = "NVSHIM_AUTO_INSTALL"
 
 AliasMapping = VersionMapping = Dict[str, str]
 
@@ -27,42 +18,63 @@ class HashableDict(dict):
         return hash(frozenset(self.items()))
 
 
-def print_stylized(text, color):
-    print(stylize(text, color))
+class Color(Enum):
+    ERROR = fg("red")
+    NOTICE = fg("yellow")
 
 
-def print_error(text: str):
-    print_stylized(text, COLOR_ERROR)
+class ErrorCode(IntEnum):
+    EXECUTABLE_NOT_FOUND = 1002
+    EXECUTABLE_NOT_GIVEN = 1000
+    VERSION_NOT_INSTALLED = 1001
 
 
-def print_notice(text: str):
-    print_stylized(text, COLOR_NOTICE)
+class EnvironmentVariable(Enum):
+    AUTO_INSTALL = "NVSHIM_AUTO_INSTALL"
+    NVM_DIR = "NVM_DIR"
 
 
-def print_found_version(nvmrc_path: str, version: str):
-    print(f"Found '{nvmrc_path}' with version <v{version}>\n")
+class Messages:
+    @staticmethod
+    def _print_stylized(text, color):
+        print(stylize(text, color))
 
+    @staticmethod
+    def _print_error(text: str):
+        Messages._print_stylized(text, Color.ERROR)
 
-def print_node_bin_file_not_provided():
-    print(f"Node executable file was not supplied")
+    @staticmethod
+    def _print_notice(text: str):
+        Messages._print_stylized(text, Color.NOTICE)
 
+    def print_env_var_missing(name: str):
+        Messages._print_error(f"Environment variable '{name}' missing")
 
-def print_node_bin_file_does_not_exist(bin_path: str):
-    print(f"No executable file found at '{bin_path}'")
+    @staticmethod
+    def print_found_version(nvmrc_path: str, version: str):
+        print(f"Found '{nvmrc_path}' with version <v{version}>\n")
 
+    @staticmethod
+    def print_node_bin_file_not_provided():
+        print(f"Node executable file was not supplied")
 
-def print_version_not_installed(version: str):
-    print_error(f"N/A version 'v{version}' is not yet installed.\n")
-    print(
-        "You need to run",
-        stylize(f"'nvm install v{version}'", COLOR_NOTICE),
-        "to install it before using it.\n",
-    )
-    print(
-        "Or set the environment variable",
-        stylize(f"'{ENV_VAR_AUTO_INSTALL}'", COLOR_NOTICE),
-        "to auto install at run time.\n",
-    )
+    @staticmethod
+    def print_node_bin_file_does_not_exist(bin_path: str):
+        print(f"No executable file found at '{bin_path}'")
+
+    @staticmethod
+    def print_version_not_installed(version: str):
+        Messages._print_error(f"N/A version 'v{version}' is not yet installed.\n")
+        print(
+            "You need to run",
+            stylize(f"'nvm install v{version}'", Color.NOTICE),
+            "to install it before using it.\n",
+        )
+        print(
+            "Or set the environment variable",
+            stylize(f"'{EnvironmentVariable.AUTO_INSTALL}'", Color.NOTICE),
+            "to auto install at run time.\n",
+        )
 
 
 def run(*args):
@@ -72,19 +84,20 @@ def run(*args):
         exit(error.returncode)
 
 
-def get_env_var(name: str, raise_missing: bool = False) -> object:
+def get_env_var(name: EnvironmentVariable, raise_missing: bool = False) -> object:
+    env_var_name = name.value
     try:
-        return json.loads(os.environ[name])
+        return json.loads(os.environ[env_var_name])
     except KeyError:
         if raise_missing:
-            print_error(f"Environment variable '{name}' missing")
+            Messages.print_env_var_missing(env_var_name)
             raise
     except json.decoder.JSONDecodeError:
-        return os.environ.get(name)
+        return os.environ.get(env_var_name)
 
 
 def get_nvm_dir() -> str:
-    return get_env_var(ENV_VAR_NVM_DIR, True)
+    return get_env_var(EnvironmentVariable.NVM_DIR, True)
 
 
 def get_files(path: str) -> [str]:
@@ -198,7 +211,7 @@ def get_nvmrc(nvmrc_path: str = None) -> str:
     if nvmrc_path:
         with open(nvmrc_path) as f:
             version = str(parse_version(f.readline().strip()))
-            print_found_version(nvmrc_path, version)
+            Messages.print_found_version(nvmrc_path, version)
             return version
 
     return "default"
@@ -209,29 +222,29 @@ def get_bin_path(version: str, node_versions: VersionMapping, bin_file: str):
         node_path = node_versions[version]
     except KeyError:
         if not is_auto_install_version_enabled():
-            print_version_not_installed(version)
-            exit(ERROR_CODE_VERSION_NOT_INSTALLED)
+            Messages.print_version_not_installed(version)
+            exit(ErrorCode.VERSION_NOT_INSTALLED)
 
         run(["nvm install", version])
 
     bin_path = os.path.join(node_path, bin_file)
     if not os.path.exists(bin_path):
-        print_node_bin_file_does_not_exist(bin_path)
-        exit(ERROR_CODE_EXECUTABLE_NOT_FOUND)
+        Messages.print_node_bin_file_does_not_exist(bin_path)
+        exit(ErrorCode.EXECUTABLE_NOT_FOUND)
 
     return bin_path
 
 
 def is_auto_install_version_enabled() -> bool:
-    return bool(get_env_var(ENV_VAR_AUTO_INSTALL))
+    return bool(get_env_var(EnvironmentVariable.AUTO_INSTALL))
 
 
 def get_args() -> [str]:
     try:
         [_, bin_file, *bin_args] = sys.argv
     except ValueError:
-        print_node_bin_file_not_provided()
-        exit(ERROR_CODE_EXECUTABLE_NOT_GIVEN)
+        Messages.print_node_bin_file_not_provided()
+        exit(ErrorCode.EXECUTABLE_NOT_GIVEN)
 
     return bin_file, bin_args
 
