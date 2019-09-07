@@ -56,6 +56,10 @@ export PATH="~/.nvshim:$PATH"
 
 Reads all configuration from the environment.
 
+### [`NVM_DIR`](https://github.com/nvm-sh/nvm#installation-and-update)
+
+Relies on nvm being installed and configured correctly.
+
 ### `NVSHIM_AUTO_INSTALL`
 
 Set to `1` or `true` to auto install specified version of node if not installed by `nvm`.
