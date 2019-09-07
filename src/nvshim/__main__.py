@@ -9,7 +9,7 @@ import semver
 COLOR_ERROR = fg("red")
 COLOR_RESET = attr("reset")
 
-AliasMapping = Dict[str, str]
+AliasMapping = VersionMapping = Dict[str, str]
 
 
 class HashableDict(dict):
@@ -48,14 +48,14 @@ def get_files(path: str) -> [str]:
         yield path
 
 
-def get_nvm_alias_dir(nvm_dir):
+def get_nvm_aliases_dir(nvm_dir):
     return os.path.join(nvm_dir, "alias")
 
 
-def get_nvm_aliases(nvm_alias_dir: str) -> AliasMapping:
+def get_nvm_aliases(nvm_aliases_dir: str) -> AliasMapping:
     aliases_to_version = HashableDict()
-    for file_path in get_files(nvm_alias_dir):
-        rel_path = os.path.relpath(file_path, nvm_alias_dir)
+    for file_path in get_files(nvm_aliases_dir):
+        rel_path = os.path.relpath(file_path, nvm_aliases_dir)
         with open(file_path) as f:
             aliases_to_version[rel_path] = f.readline().strip()
 
@@ -64,9 +64,9 @@ def get_nvm_aliases(nvm_alias_dir: str) -> AliasMapping:
 
 def parse_version(version: str) -> semver.VersionInfo:
     try:
-        if version.startswith("v"):
-            version = version[1:]
-        return semver.parse_version_info(version)
+        return semver.parse_version_info(
+            version[1:] if version.startswith("v") else version
+        )
     except ValueError:
         pass
 
@@ -85,12 +85,10 @@ def resolve_alias(
     return parse_version(name), name, seen_in_order
 
 
-def resolve_nvm_aliases(nvm_aliases: AliasMapping):
+def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> AliasMapping:
     resolved_aliases = {}
     for alias, version in nvm_aliases.items():
-        version_info = parse_version(version)
-        if not version_info:
-            version_info = resolve_alias(version, nvm_aliases)[0]
+        version_info = parse_version(version) or resolve_alias(version, nvm_aliases)[0]
 
         if version_info:
             resolved_aliases[alias] = str(version_info)
@@ -98,12 +96,25 @@ def resolve_nvm_aliases(nvm_aliases: AliasMapping):
     return resolved_aliases
 
 
-# get mapping of aliases to node versions
-# get available node versions
+def get_node_versions_dir(nvm_dir):
+    return os.path.join(nvm_dir, "versions", "node")
+
+
+def get_node_versions(node_versions_dir: str) -> VersionMapping:
+    return {
+        str(parse_version(v)): os.path.join(node_versions_dir, v, "bin")
+        for v in os.listdir(node_versions_dir)
+    }
+
+
 # get nvmrc or use default
 # return path to node or npm
 if __name__ == "__main__":
     nvm_dir = get_nvm_dir()
-    nvm_alias_dir = get_nvm_alias_dir(nvm_dir)
-    nvm_aliases = get_nvm_aliases(nvm_alias_dir)
-    print(resolve_nvm_aliases(nvm_aliases))
+    nvm_aliases_dir = get_nvm_aliases_dir(nvm_dir)
+    nvm_aliases = get_nvm_aliases(nvm_aliases_dir)
+    resolved_aliases = resolve_nvm_aliases(nvm_aliases)
+    print(resolved_aliases)
+    node_versions_dir = get_node_versions_dir(nvm_dir)
+    node_versions = get_node_versions(node_versions_dir)
+    print(node_versions)
