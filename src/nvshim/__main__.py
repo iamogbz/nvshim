@@ -117,6 +117,17 @@ def get_node_versions(node_versions_dir: str) -> VersionMapping:
     }
 
 
+def merge_nvm_aliases_with_node_versions(
+    nvm_aliases: AliasMapping, node_versions: VersionMapping
+) -> VersionMapping:
+    alias_versions = {
+        alias: node_versions[version]
+        for alias, version in nvm_aliases.items()
+        if version in node_versions
+    }
+    return dict(alias_versions, **node_versions)
+
+
 def get_nvmrc_path(exec_dir: str = "") -> str:
     root_dir = os.path.abspath(os.sep)
     current_dir = exec_dir
@@ -139,9 +150,9 @@ if __name__ == "__main__":
     nvm_aliases_dir = get_nvm_aliases_dir(nvm_dir)
     nvm_aliases = get_nvm_aliases(nvm_aliases_dir)
     resolved_aliases = resolve_nvm_aliases(nvm_aliases)
-    print(resolved_aliases)
     node_versions_dir = get_node_versions_dir(nvm_dir)
     node_versions = get_node_versions(node_versions_dir)
-    print(node_versions)
+    all_versions = merge_nvm_aliases_with_node_versions(resolved_aliases, node_versions)
+    print(all_versions)
     nvmrc_path = get_nvmrc_path()
     print(nvmrc_path)
