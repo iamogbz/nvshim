@@ -35,6 +35,7 @@ venv:
 install: venv
 	venv/bin/pip install --upgrade pip
 	venv/bin/pip install -Ur requirements.txt
+	venv/bin/python -m python_githooks
 
 .PHONY: tests
 tests:
@@ -53,6 +54,14 @@ coverage:
 build:
 	@echo "Nothing to do"
 	@mkdir ./artifacts && echo "Draft build" > ./artifacts/build
+
+.PHONY: lint
+lint:
+	black . --check
+
+.PHONY: lint-fix
+lint-fix:
+	black .
 
 ifndef VERBOSE
 .SILENT:
