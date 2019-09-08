@@ -1,3 +1,28 @@
+language: python
+dist: xenial
+python:
+  - "3.7"
 branches:
   only:
   - master
+jobs:
+  include:
+  - stage: test and build
+    script:
+      - make coverage
+      - coverage xml
+      - coveralls
+  - name: build
+    script: make build
+  - stage: deploy
+    script: make build
+    deploy:
+      provider: releases
+      api_key: $GH_TOKEN
+      file: "./artifacts/build"
+      skip_cleanup: true
+      draft: true
+      # overwrite: true
+      on:
+        branch: master
+        tags: true
