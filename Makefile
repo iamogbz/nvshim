@@ -25,6 +25,7 @@ help:
 	@echo "make tests                        - run all tests"
 	@echo "make coverage                     - run all tests and collect coverage"
 	@echo "make build                        - build executable from src"
+	@echo "make deploy                       - run semantic release on built distributables"
 
 .PHONY: venv
 venv:
@@ -62,6 +63,10 @@ lint:
 .PHONY: format
 format:
 	black .
+
+.PHONY: deploy
+deploy:
+	echo "Run semantic release"
 
 ifndef VERBOSE
 .SILENT:

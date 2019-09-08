@@ -4,6 +4,9 @@
 
 Automagically use the correct version of node with [`nvm exec`](https://github.com/nvm-sh/nvm#usage) functionality.
 
+![Build Status](https://github.com/iamogbz/nvshim/workflows/.github/workflows/pythonapp.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/iamogbz/nvshim/badge.svg)](https://coveralls.io/github/iamogbz/nvshim)
+
 > **No more `nvm use`**
 
 This will use existing [`.nvmrc`](https://github.com/nvm-sh/nvm#nvmrc) file, falling back to the [`nvm alias default`](https://github.com/nvm-sh/nvm#usage-1) version if no config detected.

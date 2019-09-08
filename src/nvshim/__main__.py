@@ -5,7 +5,7 @@ import json
 import os
 import subprocess
 import sys
-from typing import Dict, List
+from typing import Dict, List, Sequence
 
 from colored import stylize, fg, bg, attr
 import semver
@@ -286,7 +286,7 @@ def get_bin_path(
     return bin_path
 
 
-def parse_args() -> (argparse.Namespace, List[str]):
+def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
     """
     Get the arguments to be used to execute the node binary
     :return: parsed and unknown arguments
@@ -308,11 +308,11 @@ def parse_args() -> (argparse.Namespace, List[str]):
         help="arguments passed to the node executable",
     )
 
-    return parser.parse_known_args()
+    return parser.parse_known_args(args)
 
 
 def main():
-    parsed_args, unknown_args = parse_args()
+    parsed_args, unknown_args = parse_args(sys.argv[1:])
     nvmrc_path = get_nvmrc_path()
     version = get_nvmrc(nvmrc_path)
     nvm_dir = Environment.get_nvm_dir()
