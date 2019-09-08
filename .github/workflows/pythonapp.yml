@@ -1,4 +1,4 @@
-name: Python App
+name: Build Python App
 
 on: [push]
 
@@ -30,3 +30,7 @@ jobs:
     - name: Build distributables
       run: |
         make build
+    - name: Run semantic release
+      run: |
+        make deploy
+      if: github.ref == 'master'
