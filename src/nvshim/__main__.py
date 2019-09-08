@@ -70,7 +70,7 @@ class MessageLevel(IntEnum):
 
 class Message:
     @staticmethod
-    def _level() -> int:
+    def _level() -> MessageLevel:
         """Minium threshold level for logging to occur"""
         return (
             MessageLevel.QUIET
@@ -80,7 +80,7 @@ class Message:
 
     @staticmethod
     def _print(*args, level=MessageLevel.NORMAL):
-        if level.value < Message._level():
+        if level < Message._level():
             return
 
         print(*args)
@@ -104,10 +104,10 @@ class Message:
     @classmethod
     def print_using_version(cls, version: str, bin_path: str, nvmrc_path: str = None):
         messages = (
-            f"Found '{nvmrc_path}' with version <v{version}>\n"
+            f"Found '{nvmrc_path}' with version <v{version}>"
             if nvmrc_path
             else f"Using <{version}> version",
-            f".{bin_path}\n",
+            f"\n.{bin_path}\n",
         )
         cls._print("".join(messages), level=MessageLevel.QUIET)
 
