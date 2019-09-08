@@ -5,7 +5,7 @@ from utils.process import run
 
 def build_shim(name: str):
     src_base = "src"
-    src_file = os.path.join(src_base, "compile", "template.py")
+    src_file = os.path.realpath(os.path.join(__file__, "../template.py"))
     run(
         "pyinstaller",
         "-F",
