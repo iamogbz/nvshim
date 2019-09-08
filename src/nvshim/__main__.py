@@ -82,9 +82,9 @@ class Message:
         )
 
 
-def run(*args):
+def run(*args, **kwargs):
     try:
-        subprocess.check_call(args)
+        subprocess.run(args, **kwargs, check=True)
     except subprocess.CalledProcessError as error:
         exit(error.returncode)
 
@@ -178,10 +178,14 @@ def get_node_versions_dir(nvm_dir: str) -> str:
     return os.path.join(nvm_dir, "versions", "node")
 
 
+def get_node_version_bin_dir(node_versions_dir: str, version: str) -> str:
+    return os.path.join(node_versions_dir, f"v{version}", "bin")
+
+
 def get_node_versions(node_versions_dir: str) -> VersionMapping:
     return {
-        str(parse_version(v)): os.path.join(node_versions_dir, v, "bin")
-        for v in os.listdir(node_versions_dir)
+        str(v): get_node_version_bin_dir(node_versions_dir, str(v))
+        for v in map(parse_version, os.listdir(node_versions_dir))
     }
 
 
@@ -221,7 +225,18 @@ def get_nvmrc(nvmrc_path: str = None) -> str:
     return "default"
 
 
-def get_bin_path(version: str, node_versions: VersionMapping, bin_file: str):
+def get_nvmsh_path(nvm_dir: str) -> str:
+    return os.path.join(nvm_dir, "nvm.sh")
+
+
+def get_bin_path(
+    *,
+    version: str,
+    node_versions: VersionMapping,
+    bin_file: str,
+    node_versions_dir: str,
+    nvm_sh_path: str,
+):
     try:
         node_path = node_versions[version]
     except KeyError:
@@ -229,7 +244,8 @@ def get_bin_path(version: str, node_versions: VersionMapping, bin_file: str):
             Message.print_version_not_installed(version)
             exit(ErrorCode.VERSION_NOT_INSTALLED)
 
-        run(["nvm install", version])
+        run(f"source {nvm_sh_path} && nvm install {version}", shell="bash")
+        node_path = get_node_version_bin_dir(node_versions_dir, version)
 
     bin_path = os.path.join(node_path, bin_file)
     if not os.path.exists(bin_path):
@@ -256,20 +272,17 @@ def get_args() -> [str]:
 def main():
     nvm_dir = get_nvm_dir()
 
-    nvm_aliases_dir = get_nvm_aliases_dir(nvm_dir)
-    nvm_aliases = get_nvm_aliases(nvm_aliases_dir)
-    resolved_aliases = resolve_nvm_aliases(nvm_aliases)
-
-    node_versions_dir = get_node_versions_dir(nvm_dir)
-    node_versions = get_node_versions(node_versions_dir)
-
-    all_versions = merge_nvm_aliases_with_node_versions(resolved_aliases, node_versions)
-
-    nvmrc_path = get_nvmrc_path()
-    nvmrc = get_nvmrc(nvmrc_path)
-
     bin_file, bin_args = get_args()
-    bin_path = get_bin_path(nvmrc, all_versions, bin_file)
+    bin_path = get_bin_path(
+        version=get_nvmrc(get_nvmrc_path()),
+        node_versions=merge_nvm_aliases_with_node_versions(
+            resolve_nvm_aliases(get_nvm_aliases(get_nvm_aliases_dir(nvm_dir))),
+            get_node_versions(get_node_versions_dir(nvm_dir)),
+        ),
+        node_versions_dir=get_node_versions_dir(nvm_dir),
+        bin_file=bin_file,
+        nvm_sh_path=get_nvmsh_path(nvm_dir),
+    )
     run(bin_path, *bin_args)
 
 
