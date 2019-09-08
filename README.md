@@ -5,7 +5,7 @@
 Automagically use the correct version of node with [`nvm exec`](https://github.com/nvm-sh/nvm#usage) functionality.
 
 ![Build Status](https://github.com/iamogbz/nvshim/workflows/Build%20Python%20App/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/iamogbz/nvshim/badge.svg)](https://coveralls.io/github/iamogbz/nvshim)
+[![Coverage Status](https://coveralls.io/repos/github/iamogbz/nvshim/badge.svg?branch=HEAD)](https://coveralls.io/github/iamogbz/nvshim?branch=HEAD)
 
 > **No more `nvm use`**
 
