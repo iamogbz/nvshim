@@ -35,6 +35,33 @@ class EnvironmentVariable(Enum):
     VERBOSE = "NVSHIM_VERBOSE"
 
 
+class Environment:
+    @staticmethod
+    def _get_env_var(
+        env_var: EnvironmentVariable, raise_missing: bool = False
+    ) -> object:
+        try:
+            return json.loads(os.environ[env_var.value])
+        except KeyError:
+            if raise_missing:
+                Message.print_env_var_missing(env_var)
+                raise
+        except json.decoder.JSONDecodeError:
+            return os.environ.get(env_var.value)
+
+    @classmethod
+    def is_version_auto_install_enabled(cls) -> bool:
+        return bool(cls._get_env_var(EnvironmentVariable.AUTO_INSTALL))
+
+    @classmethod
+    def is_verbose_logging(cls) -> bool:
+        return cls._get_env_var(EnvironmentVariable.VERBOSE)
+
+    @classmethod
+    def get_nvm_dir(cls) -> str:
+        return cls._get_env_var(EnvironmentVariable.NVM_DIR, True)
+
+
 class MessageLevel(IntEnum):
     LOUD = 2
     NORMAL = 1
@@ -44,9 +71,10 @@ class MessageLevel(IntEnum):
 class Message:
     @staticmethod
     def _level() -> int:
+        """Minium threshold level for logging to occur"""
         return (
             MessageLevel.QUIET
-            if get_env_var(EnvironmentVariable.VERBOSE)
+            if Environment.is_verbose_logging()
             else MessageLevel.NORMAL
         )
 
@@ -107,21 +135,6 @@ def run(*args, **kwargs):
         subprocess.run(args, **kwargs, check=True)
     except subprocess.CalledProcessError as error:
         exit(error.returncode)
-
-
-def get_env_var(env_var: EnvironmentVariable, raise_missing: bool = False) -> object:
-    try:
-        return json.loads(os.environ[env_var.value])
-    except KeyError:
-        if raise_missing:
-            Message.print_env_var_missing(env_var)
-            raise
-    except json.decoder.JSONDecodeError:
-        return os.environ.get(env_var.value)
-
-
-def get_nvm_dir() -> str:
-    return get_env_var(EnvironmentVariable.NVM_DIR, True)
 
 
 def get_files(path: str) -> [str]:
@@ -258,7 +271,7 @@ def get_bin_path(
     try:
         node_path = node_versions[version]
     except KeyError:
-        if not is_auto_install_version_enabled():
+        if not Environment.is_version_auto_install_enabled():
             Message.print_version_not_installed(version)
             exit(ErrorCode.VERSION_NOT_INSTALLED)
 
@@ -271,10 +284,6 @@ def get_bin_path(
         exit(ErrorCode.EXECUTABLE_NOT_FOUND)
 
     return bin_path
-
-
-def is_auto_install_version_enabled() -> bool:
-    return bool(get_env_var(EnvironmentVariable.AUTO_INSTALL))
 
 
 def parse_args() -> (argparse.Namespace, List[str]):
@@ -303,7 +312,7 @@ def parse_args() -> (argparse.Namespace, List[str]):
 
 
 def main():
-    nvm_dir = get_nvm_dir()
+    nvm_dir = Environment.get_nvm_dir()
     parsed_args, unknown_args = parse_args()
     nvmrc_path = get_nvmrc_path()
     version = get_nvmrc(nvmrc_path)
