@@ -1,8 +1,9 @@
 $(shell test -s ".env" || cp ".env.example" ".env")
 ENVARS := $(shell cat ".env" | xargs)
-
-PIP_EXEC = "venv/bin/pip"
-PY_EXEC = "venv/bin/python"
+VENV_BIN = venv/bin/
+PIP_EXEC = $(VENV_BIN)pip
+PYTHON_EXEC = env $(ENVARS) $(VENV_BIN)python
+PYTEST_EXEC = env $(ENVARS) pytest
 
 .PHONY: upstream
 upstream:
@@ -33,35 +34,35 @@ help:
 .PHONY: venv
 venv:
 	test -d venv || python3 -m venv venv
-	touch venv/bin/activate
+	touch $(VENV_BIN)activate
 
 .PHONY: install
 install: venv
 	$(PIP_EXEC) install --upgrade pip
 	$(PIP_EXEC) install -Ur requirements.txt
-	$(PY_EXEC) -m python_githooks
+	$(PYTHON_EXEC) -m python_githooks
 
 .PHONY: tests
 tests:
-	env ${ENVARS} pytest
+	$(PYTEST_EXEC)
 
 .PHONY: test
 test:
-	env ${ENVARS} pytest -s -k $(keyword)
+	$(PYTEST_EXEC) -s -k $(keyword)
 
 .PHONY: coverage
 coverage:
-	@env ${ENVARS} coverage run --source=. -m pytest
+	@env $(ENVARS) coverage run --source=. -m pytest
 	@coverage html
 
 .PHONY: run
 run:
-	env ${ENVARS} python ./src/nvshim $(args)
+	$(PYTHON_EXEC) ./src/nvshim $(args)
 
 .PHONY: build
 build:
 	@mkdir -p ./artifacts
-	@$(PY_EXEC) ./src/build
+	@$(PYTHON_EXEC) ./src/build
 
 .PHONY: lint
 lint:

@@ -3,12 +3,13 @@ from enum import Enum, IntEnum
 import functools
 import json
 import os
-import subprocess
 import sys
 from typing import Dict, List, Sequence
 
 from colored import stylize, fg, bg, attr
 import semver
+
+from utils.process import run
 
 
 AliasMapping = VersionMapping = Dict[str, str]
@@ -128,13 +129,6 @@ class Message:
             cls._stylize(f"'{EnvironmentVariable.AUTO_INSTALL.value}'", Color.NOTICE),
             "to auto install at run time.\n",
         )
-
-
-def run(*args, **kwargs):
-    try:
-        subprocess.run(args, **kwargs, check=True)
-    except subprocess.CalledProcessError as error:
-        exit(error.returncode)
 
 
 def get_files(path: str) -> [str]:
