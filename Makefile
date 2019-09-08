@@ -42,6 +42,12 @@ install: venv
 	$(PIP_EXEC) install -Ur requirements.txt
 	$(PYTHON_EXEC) -m python_githooks
 
+.PHONY: clean
+clean:
+	rm -rf artifacts
+	rm -rf build
+	rm -rf dist
+
 .PHONY: tests
 tests:
 	$(PYTEST_EXEC)
@@ -62,7 +68,7 @@ run:
 .PHONY: build
 build:
 	@mkdir -p ./artifacts
-	@$(PYTHON_EXEC) ./src/build
+	@$(PYTHON_EXEC) ./src/compile
 
 .PHONY: lint
 lint:
