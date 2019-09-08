@@ -33,6 +33,6 @@ jobs:
       run: |
         make build
     - name: Run semantic release
+      if: github.ref == 'master'
       run: |
         make deploy
-      if: github.ref == 'master'
