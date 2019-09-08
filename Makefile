@@ -1,6 +1,9 @@
 $(shell test -s ".env" || cp ".env.example" ".env")
 ENVARS := $(shell cat ".env" | xargs)
 
+PIP_EXEC = "venv/bin/pip"
+PY_EXEC = "venv/bin/python"
+
 .PHONY: upstream
 upstream:
 	@git remote add upstream https://github.com/iamogbz/py-boilerplate
@@ -34,9 +37,9 @@ venv:
 
 .PHONY: install
 install: venv
-	venv/bin/pip install --upgrade pip
-	venv/bin/pip install -Ur requirements.txt
-	venv/bin/python -m python_githooks
+	$(PIP_EXEC) install --upgrade pip
+	$(PIP_EXEC) install -Ur requirements.txt
+	$(PY_EXEC) -m python_githooks
 
 .PHONY: tests
 tests:
@@ -51,10 +54,14 @@ coverage:
 	@env ${ENVARS} coverage run --source=. -m pytest
 	@coverage html
 
+.PHONY: run
+run:
+	env ${ENVARS} python ./src/nvshim $(args)
+
 .PHONY: build
 build:
-	@echo "Nothing to do"
-	@mkdir ./artifacts && echo "Draft build" > ./artifacts/build
+	@mkdir -p ./artifacts
+	@$(PY_EXEC) ./src/build
 
 .PHONY: lint
 lint:
