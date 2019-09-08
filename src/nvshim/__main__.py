@@ -51,11 +51,11 @@ class Message:
         )
 
     @staticmethod
-    def _print(text: str, level=MessageLevel.NORMAL):
+    def _print(*args, level=MessageLevel.NORMAL):
         if level.value < Message._level():
             return
 
-        print(text)
+        print(*args)
 
     @staticmethod
     def _stylize(text: str, color: Color) -> str:
@@ -63,7 +63,7 @@ class Message:
 
     @classmethod
     def _print_stylized(cls, text: str, color: Color, level=MessageLevel.NORMAL):
-        cls._print(cls._stylize(text, color), level)
+        cls._print(cls._stylize(text, color), level=level)
 
     @classmethod
     def _print_error(cls, text: str):
@@ -79,27 +79,23 @@ class Message:
             f"Found '{nvmrc_path}' with version <v{version}>\n"
             if nvmrc_path
             else f"Using <{version}> version",
-            f".{bin_path}",
+            f".{bin_path}\n",
         )
-        cls._print("".join(messages), MessageLevel.QUIET)
+        cls._print("".join(messages), level=MessageLevel.QUIET)
 
-    @staticmethod
-    def print_node_bin_file_not_provided():
-        print(f"Node executable file was not supplied")
-
-    @staticmethod
-    def print_node_bin_file_does_not_exist(bin_path: str):
-        print(f"No executable file found at '{bin_path}'")
+    @classmethod
+    def print_node_bin_file_does_not_exist(cls, bin_path: str):
+        cls._print(f"No executable file found at '{bin_path}'", level=MessageLevel.LOUD)
 
     @classmethod
     def print_version_not_installed(cls, version: str):
         cls._print_error(f"N/A version 'v{version}' is not yet installed.\n")
-        print(
+        cls._print(
             "You need to run",
             cls._stylize(f"'nvm install v{version}'", Color.NOTICE),
             "to install it before using it.\n",
         )
-        print(
+        cls._print(
             "Or set the environment variable",
             cls._stylize(f"'{EnvironmentVariable.AUTO_INSTALL.value}'", Color.NOTICE),
             "to auto install at run time.\n",
