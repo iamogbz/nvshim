@@ -32,32 +32,56 @@ class ErrorCode(IntEnum):
 class EnvironmentVariable(Enum):
     AUTO_INSTALL = "NVSHIM_AUTO_INSTALL"
     NVM_DIR = "NVM_DIR"
+    VERBOSE = "NVSHIM_VERBOSE"
+
+
+class MessageLevel(IntEnum):
+    LOUD = 2
+    NORMAL = 1
+    QUIET = 0
 
 
 class Message:
+    @staticmethod
+    def _level() -> int:
+        return (
+            MessageLevel.QUIET
+            if get_env_var(EnvironmentVariable.VERBOSE)
+            else MessageLevel.NORMAL
+        )
+
+    @staticmethod
+    def _print(text: str, level=MessageLevel.NORMAL):
+        if level.value < Message._level():
+            return
+
+        print(text)
+
     @staticmethod
     def _stylize(text: str, color: Color) -> str:
         return stylize(text, color.value)
 
     @classmethod
-    def _print_stylized(cls, text: str, color: Color):
-        print(cls._stylize(text, color))
+    def _print_stylized(cls, text: str, color: Color, level=MessageLevel.NORMAL):
+        cls._print(cls._stylize(text, color), level)
 
     @classmethod
     def _print_error(cls, text: str):
-        cls._print_stylized(text, Color.ERROR)
-
-    @classmethod
-    def _print_notice(cls, text: str):
-        cls._print_stylized(text, Color.NOTICE)
+        cls._print_stylized(text, Color.ERROR, MessageLevel.LOUD)
 
     @classmethod
     def print_env_var_missing(cls, env_var: EnvironmentVariable):
         cls._print_error(f"Environment variable '{env_var.value}' missing")
 
-    @staticmethod
-    def print_found_version(nvmrc_path: str, version: str):
-        print(f"Found '{nvmrc_path}' with version <v{version}>\n")
+    @classmethod
+    def print_using_version(cls, version: str, bin_path: str, nvmrc_path: str = None):
+        messages = (
+            f"Found '{nvmrc_path}' with version <v{version}>\n"
+            if nvmrc_path
+            else f"Using <{version}> version",
+            f".{bin_path}",
+        )
+        cls._print("".join(messages), MessageLevel.QUIET)
 
     @staticmethod
     def print_node_bin_file_not_provided():
@@ -218,9 +242,7 @@ def get_nvmrc_path(exec_dir: str = os.getcwd()) -> str:
 def get_nvmrc(nvmrc_path: str = None) -> str:
     if nvmrc_path:
         with open(nvmrc_path) as f:
-            version = str(parse_version(f.readline().strip()))
-            Message.print_found_version(nvmrc_path, version)
-            return version
+            return str(parse_version(f.readline().strip()))
 
     return "default"
 
@@ -283,8 +305,10 @@ def parse_args() -> argparse.Namespace:
 def main():
     nvm_dir = get_nvm_dir()
     parsed_args, unknown_args = parse_args()
+    nvmrc_path = get_nvmrc_path()
+    version = get_nvmrc(nvmrc_path)
     bin_path = get_bin_path(
-        version=get_nvmrc(get_nvmrc_path()),
+        version=version,
         node_versions=merge_nvm_aliases_with_node_versions(
             resolve_nvm_aliases(get_nvm_aliases(get_nvm_aliases_dir(nvm_dir))),
             get_node_versions(get_node_versions_dir(nvm_dir)),
@@ -293,6 +317,7 @@ def main():
         bin_file=parsed_args.bin_file,
         nvm_sh_path=get_nvmsh_path(nvm_dir),
     )
+    Message.print_using_version(version, bin_path, nvmrc_path)
     run(bin_path, *parsed_args.bin_args, *unknown_args)
 
 
