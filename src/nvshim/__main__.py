@@ -1,3 +1,4 @@
+import argparse
 from enum import Enum, IntEnum
 import functools
 import json
@@ -25,7 +26,6 @@ class Color(Enum):
 
 class ErrorCode(IntEnum):
     EXECUTABLE_NOT_FOUND = 1002
-    EXECUTABLE_NOT_GIVEN = 1000
     VERSION_NOT_INSTALLED = 1001
 
 
@@ -259,20 +259,30 @@ def is_auto_install_version_enabled() -> bool:
     return bool(get_env_var(EnvironmentVariable.AUTO_INSTALL))
 
 
-def get_args() -> [str]:
-    try:
-        [_, bin_file, *bin_args] = sys.argv
-    except ValueError:
-        Message.print_node_bin_file_not_provided()
-        exit(ErrorCode.EXECUTABLE_NOT_GIVEN)
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Launch executable using project or default node version",
+        add_help=False,
+    )
+    parser.add_argument(
+        "bin_file",
+        metavar="nvx",
+        type=str,
+        help="filename of the node executable binary",
+    )
+    parser.add_argument(
+        "bin_args",
+        metavar="args",
+        nargs="*",
+        help="arguments passed to the node executable",
+    )
 
-    return bin_file, bin_args
+    return parser.parse_known_args()
 
 
 def main():
     nvm_dir = get_nvm_dir()
-
-    bin_file, bin_args = get_args()
+    parsed_args, unknown_args = parse_args()
     bin_path = get_bin_path(
         version=get_nvmrc(get_nvmrc_path()),
         node_versions=merge_nvm_aliases_with_node_versions(
@@ -280,10 +290,10 @@ def main():
             get_node_versions(get_node_versions_dir(nvm_dir)),
         ),
         node_versions_dir=get_node_versions_dir(nvm_dir),
-        bin_file=bin_file,
+        bin_file=parsed_args.bin_file,
         nvm_sh_path=get_nvmsh_path(nvm_dir),
     )
-    run(bin_path, *bin_args)
+    run(bin_path, *parsed_args.bin_args, *unknown_args)
 
 
 if __name__ == "__main__":
