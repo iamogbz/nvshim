@@ -5,7 +5,7 @@ import json
 import os
 import subprocess
 import sys
-from typing import Dict
+from typing import Dict, List
 
 from colored import stylize, fg, bg, attr
 import semver
@@ -277,7 +277,11 @@ def is_auto_install_version_enabled() -> bool:
     return bool(get_env_var(EnvironmentVariable.AUTO_INSTALL))
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args() -> (argparse.Namespace, List[str]):
+    """
+    Get the arguments to be used to execute the node binary
+    :return: parsed and unknown arguments
+    """
     parser = argparse.ArgumentParser(
         description="Launch executable using project or default node version",
         add_help=False,
