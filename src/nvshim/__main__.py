@@ -312,10 +312,10 @@ def parse_args() -> (argparse.Namespace, List[str]):
 
 
 def main():
-    nvm_dir = Environment.get_nvm_dir()
     parsed_args, unknown_args = parse_args()
     nvmrc_path = get_nvmrc_path()
     version = get_nvmrc(nvmrc_path)
+    nvm_dir = Environment.get_nvm_dir()
     bin_path = get_bin_path(
         version=version,
         node_versions=merge_nvm_aliases_with_node_versions(
