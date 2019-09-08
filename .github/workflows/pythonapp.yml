@@ -24,6 +24,8 @@ jobs:
       run: |
         make coverage
     - name: Report coverage
+      env:
+        COVERALLS_REPO_TOKEN: eezwlMAKGWeIqbd9uQuxuB3EZ1q683sHM
       run: |
         coverage xml
         coveralls
