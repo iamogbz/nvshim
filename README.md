@@ -64,6 +64,10 @@ Relies on nvm being installed and configured correctly.
 
 Set to `1` or `true` to auto install specified version of node if not installed by `nvm`.
 
+### `NVSHIM_VERBOSE`
+
+Set to `1` or `true` to show more information on the shimmed node process.
+
 Otherwise set to `0` or `false` or nothing.
 
 ## Contribution
