@@ -35,7 +35,7 @@ def get_nvm_aliases_dir(nvm_dir: str) -> str:
 
 
 def get_nvm_aliases(nvm_aliases_dir: str) -> AliasMapping:
-    aliases_to_version = HashableDict({"default": "stable"})
+    aliases_to_version = HashableDict()
     for file_path in get_files(nvm_aliases_dir):
         rel_path = os.path.relpath(file_path, nvm_aliases_dir)
         with open(file_path) as f:
