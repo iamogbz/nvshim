@@ -154,7 +154,7 @@ def get_bin_path(
     except KeyError:
         if not environment.is_version_auto_install_enabled():
             message.print_version_not_installed(version)
-            exit(ErrorCode.VERSION_NOT_INSTALLED)
+            sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
 
         process.run(f"source {nvm_sh_path} && nvm install {version}", shell="bash")
         node_path = get_node_version_bin_dir(node_versions_dir, version)
@@ -162,7 +162,7 @@ def get_bin_path(
     bin_path = os.path.join(node_path, bin_file)
     if not os.path.exists(bin_path):
         message.print_node_bin_file_does_not_exist(bin_path)
-        exit(ErrorCode.EXECUTABLE_NOT_FOUND)
+        sys.exit(ErrorCode.EXECUTABLE_NOT_FOUND)
 
     return bin_path
 
@@ -200,7 +200,7 @@ def main():
         nvm_dir = environment.get_nvm_dir()
     except environment.MissingEnvironmentVariableError as error:
         message.print_env_var_missing(error.env_var)
-        exit(ErrorCode.ENV_NVM_DIR_MISSING)
+        sys.exit(ErrorCode.ENV_NVM_DIR_MISSING)
 
     bin_path = get_bin_path(
         version=version,

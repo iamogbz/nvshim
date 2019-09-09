@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from typing import Dict
 
 
@@ -15,4 +16,4 @@ def run(*args, **kwargs):
             args, **kwargs, check=True, env=_with_venv(kwargs.get("env", os.environ))
         )
     except subprocess.CalledProcessError as error:
-        exit(error.returncode)
+        sys.exit(error.returncode)
