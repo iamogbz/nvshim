@@ -26,7 +26,7 @@ def get_files(path: str) -> [str]:
         for root, _, files in os.walk(path):
             for name in files:
                 yield os.path.join(root, name)
-    else:
+    elif os.path.exists(path):
         yield path
 
 
