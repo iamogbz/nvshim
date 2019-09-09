@@ -1,4 +1,5 @@
 import argparse
+from functools import reduce
 import os
 import re
 import stat
@@ -14,14 +15,14 @@ def parse_args(args: Sequence[str]) -> argparse.Namespace:
     parser.add_argument(
         "install_path",
         type=str,
-        nargs="?",
+        metavar="NVSHIM_DIR",
         help="Path to location for node shims installation",
-        default=os.path.join(os.path.expanduser("~"), ".nvshim"),
     )
     parser.add_argument(
         "profile_path",
         type=str,
         nargs="?",
+        metavar="PROFILE",
         help="Path to profile to configure with exports",
     )
 
@@ -66,13 +67,30 @@ def configure_sh(install_path: str, profile_path: str):
     configure_profile(f'export PATH="{install_path}:$PATH"', profile_path)
 
 
+def parse_path(path: str) -> str:
+    return reduce(
+        lambda p, r: r(p),
+        [os.path.expanduser, os.path.expandvars, os.path.realpath],
+        path,
+    )
+
+
 def main(shim_bin: bytes, version_number: str = __version__):
     message.print_installing_version(version_number)
-    args = parse_args(sys.argv[1:])
-    install_path = os.path.realpath(args.install_path)
+
+    defaults = {0: os.path.join(os.path.expanduser("~"), ".nvshim")}
+    argv = {i: value for i, value in enumerate(sys.argv[1:])}
+    envs = {
+        i: os.environ.get(env_var)
+        for i, env_var in enumerate(["NVSHIM_DIR", "PROFILE"])
+        if env_var in os.environ
+    }
+    args = parse_args({**defaults, **argv, **envs}.values())
+
+    install_path = parse_path(args.install_path)
     install_shims(shim_bin, install_path)
     if args.profile_path:
-        configure_sh(install_path, args.profile_path)
+        configure_sh(install_path, parse_path(args.profile_path))
 
     message.print_install_complete()
 
