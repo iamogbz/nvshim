@@ -85,7 +85,7 @@ run:
 .PHONY: build
 build: clean
 	@mkdir -p ./artifacts
-	@$(PYTHON_EXEC) ./src/compile
+	@$(PYTHON_EXEC) ./src/compiler
 
 .PHONY: sanity
 sanity:
