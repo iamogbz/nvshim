@@ -92,7 +92,7 @@ make build
 
 #### Run installer
 
-With the environment variables as the [install script](#script).
+With the same environment variables as the [install script](#script).
 
 ##### Example
 
