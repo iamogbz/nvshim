@@ -35,7 +35,7 @@ def get_nvm_aliases_dir(nvm_dir: str) -> str:
 
 
 def get_nvm_aliases(nvm_aliases_dir: str) -> AliasMapping:
-    aliases_to_version = HashableDict()
+    aliases_to_version = HashableDict({"default": "stable"})
     for file_path in get_files(nvm_aliases_dir):
         rel_path = os.path.relpath(file_path, nvm_aliases_dir)
         with open(file_path) as f:
@@ -156,15 +156,16 @@ def get_bin_path(
     node_versions_dir: str,
     nvm_sh_path: str,
 ):
-    pretty_version = f"v{version}" if version_parsed else version
     try:
         node_path = node_versions[version]
     except KeyError:
         if not environment.is_version_auto_install_enabled():
-            message.print_version_not_installed(pretty_version)
+            message.print_version_not_installed(
+                f"v{version}" if version_parsed else version
+            )
             sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
 
-        process.run(f". {nvm_sh_path} && nvm install {pretty_version}", shell="bash")
+        process.run(f". {nvm_sh_path} && nvm install {version}", shell="bash")
         node_path = get_node_version_bin_dir(node_versions_dir, version)
 
     bin_path = os.path.join(node_path, bin_file)
