@@ -61,10 +61,10 @@ def print_node_bin_file_does_not_exist(bin_path: str):
 
 
 def print_version_not_installed(version: str):
-    _print_error(f"N/A version 'v{version}' is not yet installed.\n")
+    _print_error(f"N/A version '{version}' is not yet installed.\n")
     _print(
         "You need to run",
-        _stylize(f"'nvm install v{version}'", Color.NOTICE),
+        _stylize(f"'nvm install {version}'", Color.NOTICE),
         "to install it before using it.\n",
     )
     _print(
