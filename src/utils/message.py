@@ -95,3 +95,7 @@ def print_installing_version(version_number: str):
 
 def print_running_version(version_number: str):
     _print(f"Executing shim version {version_number}", level=MessageLevel.QUIET)
+
+
+def print_unable_to_get_stable_version():
+    _print_error("Unable to retrieve stable version from nvm", level=MessageLevel.LOUD)
