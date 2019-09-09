@@ -52,7 +52,6 @@ def get_nvm_aliases_dir(nvm_dir: str) -> str:
     return os.path.join(nvm_dir, "alias")
 
 
-@functools.lru_cache(maxsize=None)
 def get_nvm_aliases(nvm_dir: str) -> AliasMapping:
     aliases_to_version = HashableDict(
         default="stable", node="stable", stable=get_nvm_stable_version(nvm_dir)
