@@ -7,8 +7,8 @@ from utils.process import run
 FileContents = Union[bytes, str]
 
 
-def _get_template_file_path(filename: str) -> str:
-    return os.path.realpath(os.path.join(__file__, f"../templates/{filename}.py"))
+def _get_script_file_path(filename: str) -> str:
+    return os.path.realpath(os.path.join(__file__, f"../scripts/{filename}.py"))
 
 
 def _read_file(path: str, mode: str = "r") -> FileContents:
@@ -36,7 +36,7 @@ def _build_dist(name: str):
         dist_path,
         "--specpath",
         "artifacts",
-        _get_template_file_path(name),
+        _get_script_file_path(name),
     )
     return os.path.join(dist_path, name)
 
@@ -45,7 +45,7 @@ def build_installer(shim_bin: bytes):
     """Build installer exec for a particular nvshim version binary"""
     name = "installer"
 
-    py_file_path = _get_template_file_path(name)
+    py_file_path = _get_script_file_path(name)
     original_content = _read_file(py_file_path)
     try:
         _write_file(

@@ -78,7 +78,7 @@ run:
 	$(PYTHON_EXEC) $(py) $(args)
 
 .PHONY: build
-build:
+build: clean
 	@mkdir -p ./artifacts
 	@$(PYTHON_EXEC) ./src/compile
 
