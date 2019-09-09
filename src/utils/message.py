@@ -48,7 +48,7 @@ def print_env_var_missing(env_var: EnvironmentVariable):
 
 def print_using_version(version: str, bin_path: str, nvmrc_path: str = None):
     messages = (
-        f"Found '{nvmrc_path}' with version <v{version}>"
+        f"Found '{nvmrc_path}' with version <{version}>"
         if nvmrc_path
         else f"Using <{version}> version",
         f"\n.{bin_path}\n",

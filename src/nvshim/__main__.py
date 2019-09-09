@@ -147,10 +147,14 @@ def get_nvmsh_path(nvm_dir: str) -> str:
     return os.path.join(nvm_dir, "nvm.sh")
 
 
+def _pretty_version(version: str, parsed: bool) -> str:
+    return f"v{version}" if parsed else version
+
+
 def get_bin_path(
     *,
     version: str,
-    version_parsed: bool,
+    is_version_parsed: bool,
     nvm_aliases: AliasMapping,
     node_versions: VersionMapping,
     bin_file: str,
@@ -163,7 +167,7 @@ def get_bin_path(
     except KeyError:
         if not environment.is_version_auto_install_enabled():
             message.print_version_not_installed(
-                f"v{version}" if version_parsed else version
+                _pretty_version(version, is_version_parsed)
             )
             sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
 
@@ -217,14 +221,14 @@ def main():
 
     bin_path = get_bin_path(
         version=version,
-        version_parsed=parsed,
+        is_version_parsed=parsed,
         nvm_aliases=resolve_nvm_aliases(get_nvm_aliases(get_nvm_aliases_dir(nvm_dir))),
         node_versions=get_node_versions(get_node_versions_dir(nvm_dir)),
         node_versions_dir=get_node_versions_dir(nvm_dir),
         bin_file=parsed_args.bin_file,
         nvm_sh_path=get_nvmsh_path(nvm_dir),
     )
-    message.print_using_version(version, bin_path, nvmrc_path)
+    message.print_using_version(_pretty_version(version, parsed), bin_path, nvmrc_path)
     process.run(bin_path, *parsed_args.bin_args, *unknown_args)
 
 
