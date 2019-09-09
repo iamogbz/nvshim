@@ -13,39 +13,92 @@ This will use existing [`.nvmrc`](https://github.com/nvm-sh/nvm#nvmrc) file, fal
 
 ## Installation
 
-### Script
+> TODO: implement readme documentation spec
+
+### Pip
 
 ```sh
-curl -s https://github.com/iamogbz/nvmshim/releases/download/v0.0.1/installer.py | python
+pip install nvshim
 ```
 
-### Manual
+### Script
 
-#### Download distributable
+Use the distributed installer
+
+```sh
+curl -s https://github.com/iamogbz/nvmshim/releases/download/v0.0.1/installer.py | env NVSHIM_DIR=~/.nvm/shims PROFILE=~/.bashrc python
+```
+
+> Each installer is keyed to its release version
+
+<details>
+<summary>Details</summary>
+
+#### Manual
+
+All the shim binaries are identical, with the only difference being the name of the node binary to shim.
+
+##### Download distributable
 
 Get specific `shim` version from the [releases page](https://github.com/iamogbz/nvmshim/releases).
 
-#### Ensure downloaded bin can be run
+##### Ensure downloaded file can be executed
 
 ```sh
 chmod +x shim
 ```
 
-#### Copy into folder `~/.nvshim`
+##### Copy binary into your nvshim install path
 
 ```sh
-cp shim ~/.nvmshim/node
-cp shim ~/.nvmshim/npm
-cp shim ~/.nvmshim/npx
+mkdir -p ~/.nvm/shims
 ```
-
-#### Add install folder to `PATH`
 
 ```sh
-export PATH="~/.nvshim:$PATH"
+cp shim ~/.nvm/shims/node
+cp shim ~/.nvm/shims/npm
+cp shim ~/.nvm/shims/npx
 ```
 
-#### Profit
+##### Add install folder to `PATH` in your shell config profile
+
+```sh
+export PATH="~/.nvm/shims:$PATH"
+```
+
+</details>
+
+### Build
+
+This requires having `git` and `make` configured for your terminal.
+
+#### Clone and navigate into repo
+
+```sh
+git clone git@github.com:iamogbz/nvshim.git && cd nvmshim
+```
+
+#### Install dependencies
+
+```sh
+make install
+```
+
+#### Build distributable binaries
+
+```sh
+make build
+```
+
+#### Run installer
+
+With the same arguments as the [install script](#script).
+
+##### Example
+
+```sh
+env NVSHIM_DIR=~/.nvm/shims PROFILE=~/.config/fish/config.fish dist/installer
+```
 
 ## Configuration
 
@@ -68,3 +121,7 @@ Otherwise set to `0` or `false` or nothing.
 ## Contribution
 
 All forms of contribution welcome, please see [guide](./CONTRIBUTING.md).
+
+```sh
+make tests
+```
