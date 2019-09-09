@@ -1,5 +1,17 @@
 $(shell test -s ".env" || cp ".env.example" ".env")
 ENVARS := $(shell cat ".env" | xargs)
+WITH_ENV = env $(ENVARS)
+
+VENV_BIN = venv/bin/
+VENV_PIP = $(VENV_BIN)pip
+VENV_PYTEST = $(VENV_BIN)pytest
+VENV_PYTHON = $(VENV_BIN)python
+VENV_COVERAGE = $(VENV_BIN)coverage
+VENV_BLACK = $(VENV_BIN)black
+
+PYTHON_EXEC = $(WITH_ENV) $(VENV_PYTHON)
+PYTEST_EXEC = $(WITH_ENV) $(VENV_PYTEST)
+COVERAGE_EXEC = $(WITH_ENV) $(VENV_COVERAGE)
 
 .PHONY: upstream
 upstream:
@@ -30,39 +42,53 @@ help:
 .PHONY: venv
 venv:
 	test -d venv || python3 -m venv venv
-	touch venv/bin/activate
+	touch $(VENV_BIN)activate
 
 .PHONY: install
 install: venv
-	venv/bin/pip install --upgrade pip
-	venv/bin/pip install -Ur requirements.txt
-	venv/bin/python -m python_githooks
+	$(VENV_PIP) install --upgrade pip
+	$(VENV_PIP) install -Ur requirements.txt
+	$(PYTHON_EXEC) -m python_githooks
+
+.PHONY: clean
+clean:
+	rm -rf artifacts
+	rm -rf build
+	rm -rf dist
 
 .PHONY: tests
 tests:
-	env ${ENVARS} pytest
+	$(PYTEST_EXEC)
 
 .PHONY: test
 test:
-	env ${ENVARS} pytest -s -k $(keyword)
+	$(PYTEST_EXEC) -s -k $(keyword)
 
 .PHONY: coverage
 coverage:
-	@env ${ENVARS} coverage run --source=. -m pytest
-	@coverage html
+	@$(COVERAGE_EXEC) run --source=. -m pytest
+	@$(VENV_COVERAGE) html
+
+.PHONY: report
+report:
+	$(VENV_COVERAGE) xml && $(VENV_BIN)coveralls
+
+.PHONY: run
+run:
+	$(PYTHON_EXEC) $(py) $(args)
 
 .PHONY: build
-build:
-	@echo "Nothing to do"
-	@mkdir ./artifacts && echo "Draft build" > ./artifacts/build
+build: clean
+	@mkdir -p ./artifacts
+	@$(PYTHON_EXEC) ./src/compile
 
 .PHONY: lint
 lint:
-	black . --check
+	$(VENV_BLACK) . --check
 
 .PHONY: format
 format:
-	black .
+	$(VENV_BLACK) .
 
 .PHONY: deploy
 deploy:

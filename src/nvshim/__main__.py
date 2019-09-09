@@ -1,14 +1,13 @@
 import argparse
-from enum import Enum, IntEnum
 import functools
-import json
 import os
-import subprocess
 import sys
 from typing import Dict, List, Sequence
 
-from colored import stylize, fg, bg, attr
 import semver
+
+from utils import environment, message, process
+from utils.constants import ErrorCode
 
 
 AliasMapping = VersionMapping = Dict[str, str]
@@ -17,124 +16,6 @@ AliasMapping = VersionMapping = Dict[str, str]
 class HashableDict(dict):
     def __hash__(self):
         return hash(frozenset(self.items()))
-
-
-class Color(Enum):
-    ERROR = fg("red")
-    NOTICE = fg("yellow")
-
-
-class ErrorCode(IntEnum):
-    EXECUTABLE_NOT_FOUND = 1002
-    VERSION_NOT_INSTALLED = 1001
-
-
-class EnvironmentVariable(Enum):
-    AUTO_INSTALL = "NVSHIM_AUTO_INSTALL"
-    NVM_DIR = "NVM_DIR"
-    VERBOSE = "NVSHIM_VERBOSE"
-
-
-class Environment:
-    @staticmethod
-    def _get_env_var(
-        env_var: EnvironmentVariable, raise_missing: bool = False
-    ) -> object:
-        try:
-            return json.loads(os.environ[env_var.value])
-        except KeyError:
-            if raise_missing:
-                Message.print_env_var_missing(env_var)
-                raise
-        except json.decoder.JSONDecodeError:
-            return os.environ.get(env_var.value)
-
-    @classmethod
-    def is_version_auto_install_enabled(cls) -> bool:
-        return bool(cls._get_env_var(EnvironmentVariable.AUTO_INSTALL))
-
-    @classmethod
-    def is_verbose_logging(cls) -> bool:
-        return cls._get_env_var(EnvironmentVariable.VERBOSE)
-
-    @classmethod
-    def get_nvm_dir(cls) -> str:
-        return cls._get_env_var(EnvironmentVariable.NVM_DIR, True)
-
-
-class MessageLevel(IntEnum):
-    LOUD = 2
-    NORMAL = 1
-    QUIET = 0
-
-
-class Message:
-    @staticmethod
-    def _level() -> MessageLevel:
-        """Minium threshold level for logging to occur"""
-        return (
-            MessageLevel.QUIET
-            if Environment.is_verbose_logging()
-            else MessageLevel.NORMAL
-        )
-
-    @staticmethod
-    def _print(*args, level=MessageLevel.NORMAL):
-        if level < Message._level():
-            return
-
-        print(*args)
-
-    @staticmethod
-    def _stylize(text: str, color: Color) -> str:
-        return stylize(text, color.value)
-
-    @classmethod
-    def _print_stylized(cls, text: str, color: Color, level=MessageLevel.NORMAL):
-        cls._print(cls._stylize(text, color), level=level)
-
-    @classmethod
-    def _print_error(cls, text: str):
-        cls._print_stylized(text, Color.ERROR, MessageLevel.LOUD)
-
-    @classmethod
-    def print_env_var_missing(cls, env_var: EnvironmentVariable):
-        cls._print_error(f"Environment variable '{env_var.value}' missing")
-
-    @classmethod
-    def print_using_version(cls, version: str, bin_path: str, nvmrc_path: str = None):
-        messages = (
-            f"Found '{nvmrc_path}' with version <v{version}>"
-            if nvmrc_path
-            else f"Using <{version}> version",
-            f"\n.{bin_path}\n",
-        )
-        cls._print("".join(messages), level=MessageLevel.QUIET)
-
-    @classmethod
-    def print_node_bin_file_does_not_exist(cls, bin_path: str):
-        cls._print(f"No executable file found at '{bin_path}'", level=MessageLevel.LOUD)
-
-    @classmethod
-    def print_version_not_installed(cls, version: str):
-        cls._print_error(f"N/A version 'v{version}' is not yet installed.\n")
-        cls._print(
-            "You need to run",
-            cls._stylize(f"'nvm install v{version}'", Color.NOTICE),
-            "to install it before using it.\n",
-        )
-        cls._print(
-            "Or set the environment variable",
-            cls._stylize(f"'{EnvironmentVariable.AUTO_INSTALL.value}'", Color.NOTICE),
-            "to auto install at run time.\n",
-        )
-
-
-def run(*args, **kwargs):
-    try:
-        subprocess.run(args, **kwargs, check=True)
-    except subprocess.CalledProcessError as error:
-        exit(error.returncode)
 
 
 def get_files(path: str) -> [str]:
@@ -271,16 +152,16 @@ def get_bin_path(
     try:
         node_path = node_versions[version]
     except KeyError:
-        if not Environment.is_version_auto_install_enabled():
-            Message.print_version_not_installed(version)
+        if not environment.is_version_auto_install_enabled():
+            message.print_version_not_installed(version)
             exit(ErrorCode.VERSION_NOT_INSTALLED)
 
-        run(f"source {nvm_sh_path} && nvm install {version}", shell="bash")
+        process.run(f"source {nvm_sh_path} && nvm install {version}", shell="bash")
         node_path = get_node_version_bin_dir(node_versions_dir, version)
 
     bin_path = os.path.join(node_path, bin_file)
     if not os.path.exists(bin_path):
-        Message.print_node_bin_file_does_not_exist(bin_path)
+        message.print_node_bin_file_does_not_exist(bin_path)
         exit(ErrorCode.EXECUTABLE_NOT_FOUND)
 
     return bin_path
@@ -315,7 +196,12 @@ def main():
     parsed_args, unknown_args = parse_args(sys.argv[1:])
     nvmrc_path = get_nvmrc_path()
     version = get_nvmrc(nvmrc_path)
-    nvm_dir = Environment.get_nvm_dir()
+    try:
+        nvm_dir = environment.get_nvm_dir()
+    except environment.MissingEnvironmentVariableError as error:
+        message.print_env_var_missing(error.message)
+        raise
+
     bin_path = get_bin_path(
         version=version,
         node_versions=merge_nvm_aliases_with_node_versions(
@@ -326,8 +212,8 @@ def main():
         bin_file=parsed_args.bin_file,
         nvm_sh_path=get_nvmsh_path(nvm_dir),
     )
-    Message.print_using_version(version, bin_path, nvmrc_path)
-    run(bin_path, *parsed_args.bin_args, *unknown_args)
+    message.print_using_version(version, bin_path, nvmrc_path)
+    process.run(bin_path, *parsed_args.bin_args, *unknown_args)
 
 
 if __name__ == "__main__":

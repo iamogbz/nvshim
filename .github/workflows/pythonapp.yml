@@ -15,8 +15,7 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        make install
     - name: Lint source files
       run: |
         make lint
@@ -27,8 +26,7 @@ jobs:
       env:
         COVERALLS_REPO_TOKEN: eezwlMAKGWeIqbd9uQuxuB3EZ1q683sHM
       run: |
-        coverage xml
-        coveralls
+        make report
     - name: Build distributables
       run: |
         make build

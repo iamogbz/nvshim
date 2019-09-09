@@ -3,3 +3,5 @@ artifacts
 coverage.xml
 htmlcov
 venv
+build
+dist

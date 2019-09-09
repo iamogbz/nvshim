@@ -23,29 +23,23 @@ curl -s https://github.com/iamogbz/nvmshim/releases/download/v0.0.1/installer.py
 
 #### Download distributable
 
-Get specific version from the [releases page](https://github.com/iamogbz/nvmshim/releases).
+Get specific `shim` version from the [releases page](https://github.com/iamogbz/nvmshim/releases).
 
-#### Extract into folder `~/.nvshim`
-
-```sh
-unzip nvmshim.zip -o ~/.nvmshim
-```
-
-- nvshim.py
-- node.sh
-- npm.sh
-
-#### Ensure scripts can be run
-
-Make files executable
+#### Ensure downloaded bin can be run
 
 ```sh
-chmod +x nvmshim.py
-chmod +x node.py
-chmod +x npm.py
+chmod +x shim
 ```
 
-#### Add to shell scripts path
+#### Copy into folder `~/.nvshim`
+
+```sh
+cp shim ~/.nvmshim/node
+cp shim ~/.nvmshim/npm
+cp shim ~/.nvmshim/npx
+```
+
+#### Add to install folder to `PATH`
 
 Add `~/.nvshim` to `PATH`
 
