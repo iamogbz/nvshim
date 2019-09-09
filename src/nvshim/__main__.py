@@ -44,11 +44,11 @@ def _run_nvm_cmd(nvm_sh_path: str, args: str) -> process.subprocess.CompletedPro
 @functools.lru_cache(maxsize=None)
 def get_nvm_stable_version(nvm_dir) -> str:
     output = _run_nvm_cmd(get_nvmsh_path(nvm_dir), "alias stable").stdout
-    print(output)
     result = re.sub(r"\x1B[@-_][0-?]*[ -/]*[@-~]", "", str(output).strip())
-    matches = re.findall(r"> v([\w\.]+)\)", result)
-    print(matches)
-    return matches[0] if len(matches) else ""
+    try:
+        return re.findall(r"> v([\w\.]+)", result)[0]
+    except KeyError:
+        message.print_unable_to_get_stable_version()
 
 
 def get_nvm_aliases_dir(nvm_dir: str) -> str:
