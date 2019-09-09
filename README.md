@@ -39,9 +39,7 @@ cp shim ~/.nvmshim/npm
 cp shim ~/.nvmshim/npx
 ```
 
-#### Add to install folder to `PATH`
-
-Add `~/.nvshim` to `PATH`
+#### Add install folder to `PATH`
 
 ```sh
 export PATH="~/.nvshim:$PATH"
