@@ -34,10 +34,12 @@ jobs:
         make lint
     - name: Report coverage
       env:
-        COVERALLS_REPO_TOKEN: eezwlMAKGWeIqbd9uQuxuB3EZ1q683sHM
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         make report
     - name: Run semantic release
       if: github.ref == 'master'
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         make deploy

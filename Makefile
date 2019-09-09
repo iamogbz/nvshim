@@ -100,7 +100,7 @@ format:
 
 .PHONY: deploy
 deploy:
-	echo "Run semantic release"
+	$(VENV_BIN)semantic-release publish
 
 ifndef VERBOSE
 .SILENT:
