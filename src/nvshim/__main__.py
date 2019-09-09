@@ -1,6 +1,7 @@
 import argparse
 import functools
 import os
+import re
 import sys
 from typing import Dict, List, Sequence
 
@@ -31,16 +32,32 @@ def get_files(path: str) -> [str]:
         yield path
 
 
+def _run_nvm_cmd(nvm_sh_path: str, args: str) -> process.subprocess.CompletedProcess:
+    return process.run(
+        f". {nvm_sh_path} && nvm {args}",
+        shell="bash",
+        encoding="UTF-8",
+        capture_output=True,
+    )
+
+
+@functools.lru_cache(maxsize=None)
+def get_nvm_stable_version(nvm_dir) -> str:
+    output = _run_nvm_cmd(get_nvmsh_path(nvm_dir), "alias stable").stdout
+    result = re.sub(r"\x1B[@-_][0-?]*[ -/]*[@-~]", "", str(output).strip())
+    return re.findall(r"> v([\w\.]+)\)", result)[0]
+
+
 def get_nvm_aliases_dir(nvm_dir: str) -> str:
     return os.path.join(nvm_dir, "alias")
 
 
-def get_nvm_aliases(nvm_aliases_dir: str) -> AliasMapping:
-    aliases_to_version = HashableDict({
-        "default": "stable",
-        "node": "stable",
-        "stable": "12.10.0", # TODO: get stable version somehow
-    })
+@functools.lru_cache(maxsize=None)
+def get_nvm_aliases(nvm_dir: str) -> AliasMapping:
+    aliases_to_version = HashableDict(
+        default="stable", node="stable", stable=get_nvm_stable_version(nvm_dir)
+    )
+    nvm_aliases_dir = get_nvm_aliases_dir(nvm_dir)
     for file_path in get_files(nvm_aliases_dir):
         rel_path = os.path.relpath(file_path, nvm_aliases_dir)
         with open(file_path) as f:
@@ -79,6 +96,7 @@ def resolve_alias(
     return parse_version(name), name, seen_in_order
 
 
+@functools.lru_cache(maxsize=None)
 def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> AliasMapping:
     """
     Resolve all aliases in a mapping to their version info
@@ -176,7 +194,7 @@ def get_bin_path(
             )
             sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
 
-        process.run(f". {nvm_sh_path} && nvm install {version}", shell="bash")
+        _run_nvm_cmd(nvm_sh_path, f"install {version}")
         node_path = get_node_version_bin_dir(
             node_versions_dir, version=nvm_aliases.get(version, version)
         )
@@ -228,7 +246,7 @@ def main(version_number: str = __version__):
     bin_path = get_bin_path(
         version=version,
         is_version_parsed=parsed,
-        nvm_aliases=resolve_nvm_aliases(get_nvm_aliases(get_nvm_aliases_dir(nvm_dir))),
+        nvm_aliases=resolve_nvm_aliases(get_nvm_aliases(nvm_dir)),
         node_versions=get_node_versions(get_node_versions_dir(nvm_dir)),
         node_versions_dir=get_node_versions_dir(nvm_dir),
         bin_file=parsed_args.bin_file,
