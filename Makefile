@@ -108,7 +108,7 @@ format:
 
 .PHONY: deploy
 deploy:
-	$(VENV_RELEASE) publish
+	echo "$(VENV_RELEASE) publish"
 
 ifndef VERBOSE
 .SILENT:
