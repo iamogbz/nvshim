@@ -108,6 +108,7 @@ format:
 
 .PHONY: deploy
 deploy:
+	env
 	echo "$(VENV_RELEASE) publish"
 
 ifndef VERBOSE
