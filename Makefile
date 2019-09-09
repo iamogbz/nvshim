@@ -83,7 +83,7 @@ build: clean
 	@$(PYTHON_EXEC) ./src/compile
 
 .PHONY: sanities
-sanities: clean
+sanities:
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE='~/.profile' bash
 	./dist/installer ~/.nvshim/bin ~/.profile
 	bash -l -c 'node --version'

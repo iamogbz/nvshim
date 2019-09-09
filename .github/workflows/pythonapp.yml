@@ -31,6 +31,8 @@ jobs:
       run: |
         make build
     - name: Run sanities
+      env:
+        NVSHIM_AUTO_INSTALL: true
       run: |
         make sanities
     - name: Run semantic release
