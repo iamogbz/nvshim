@@ -164,9 +164,7 @@ def get_bin_path(
             message.print_version_not_installed(pretty_version)
             sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
 
-        process.run(
-            f"source {nvm_sh_path} && nvm install {pretty_version}", shell="bash"
-        )
+        process.run(f". {nvm_sh_path} && nvm install {pretty_version}", shell="bash")
         node_path = get_node_version_bin_dir(node_versions_dir, version)
 
     bin_path = os.path.join(node_path, bin_file)
