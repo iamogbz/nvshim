@@ -8,7 +8,9 @@ VENV_PYTEST = $(VENV_BIN)pytest
 VENV_PYTHON = $(VENV_BIN)python
 VENV_COVERAGE = $(VENV_BIN)coverage
 VENV_BLACK = $(VENV_BIN)black
-VENV_RELEASE = $(VENV_BIN)semantic-release$(shell [ '$(GITHUB_REF)' = 'master' ] && echo '' || echo ' --noop')
+
+RELEASE_FLAGS = $(shell [ '$(GITHUB_REF)' = 'refs/heads/master' ] && echo '' || echo ' --noop')
+VENV_RELEASE = $(VENV_BIN)semantic-release$(RELEASE_FLAGS)
 
 PYTHON_EXEC = $(WITH_ENV) $(VENV_PYTHON)
 PYTEST_EXEC = $(WITH_ENV) $(VENV_PYTEST)
@@ -108,7 +110,6 @@ format:
 
 .PHONY: deploy
 deploy:
-	env
 	echo "$(VENV_RELEASE) publish"
 
 ifndef VERBOSE
