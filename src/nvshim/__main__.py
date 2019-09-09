@@ -151,13 +151,15 @@ def get_bin_path(
     *,
     version: str,
     version_parsed: bool,
+    nvm_aliases: AliasMapping,
     node_versions: VersionMapping,
     bin_file: str,
     node_versions_dir: str,
     nvm_sh_path: str,
 ):
+    version_mapping = merge_nvm_aliases_with_node_versions(nvm_aliases, node_versions)
     try:
-        node_path = node_versions[version]
+        node_path = version_mapping[version]
     except KeyError:
         if not environment.is_version_auto_install_enabled():
             message.print_version_not_installed(
@@ -166,7 +168,9 @@ def get_bin_path(
             sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
 
         process.run(f". {nvm_sh_path} && nvm install {version}", shell="bash")
-        node_path = get_node_version_bin_dir(node_versions_dir, version)
+        node_path = get_node_version_bin_dir(
+            node_versions_dir, version=nvm_aliases.get(version, version)
+        )
 
     bin_path = os.path.join(node_path, bin_file)
     if not os.path.exists(bin_path):
@@ -214,10 +218,8 @@ def main():
     bin_path = get_bin_path(
         version=version,
         version_parsed=parsed,
-        node_versions=merge_nvm_aliases_with_node_versions(
-            resolve_nvm_aliases(get_nvm_aliases(get_nvm_aliases_dir(nvm_dir))),
-            get_node_versions(get_node_versions_dir(nvm_dir)),
-        ),
+        nvm_aliases=resolve_nvm_aliases(get_nvm_aliases(get_nvm_aliases_dir(nvm_dir))),
+        node_versions=get_node_versions(get_node_versions_dir(nvm_dir)),
         node_versions_dir=get_node_versions_dir(nvm_dir),
         bin_file=parsed_args.bin_file,
         nvm_sh_path=get_nvmsh_path(nvm_dir),
