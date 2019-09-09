@@ -1,10 +1,26 @@
 import os
+from typing import Union
 
 from utils.process import run
 
 
+FileContents = Union[bytes, str]
+
+
 def _get_template_file_path(filename: str) -> str:
     return os.path.realpath(os.path.join(__file__, f"../templates/{filename}.py"))
+
+
+def _read_file(path: str, mode: str = "r") -> FileContents:
+    with open(path, mode) as f:
+        contents = f.read()
+
+    return contents
+
+
+def _write_file(path: str, contents: FileContents, mode: str = "w"):
+    with open(path, mode) as f:
+        f.write(contents)
 
 
 def _build_dist(name: str):
@@ -30,12 +46,15 @@ def build_installer(shim_bin: bytes):
     name = "installer"
 
     py_file_path = _get_template_file_path(name)
-    with open(py_file_path, "r") as f:
-        content = f.read().replace("{SHIM_BIN_PLACEHOLDER}", str(shim_bin))
-    with open(py_file_path, "w") as f:
-        f.write(content)
-
-    return _build_dist(name)
+    original_content = _read_file(py_file_path)
+    try:
+        _write_file(
+            py_file_path,
+            original_content.replace("{SHIM_BIN_PLACEHOLDER}", str(shim_bin)),
+        )
+        return _build_dist(name)
+    finally:
+        _write_file(py_file_path, original_content)
 
 
 def build_shim() -> str:
@@ -44,9 +63,7 @@ def build_shim() -> str:
 
 
 def main():
-    shim_path = build_shim()
-    with open(shim_path, "rb") as shim_file:
-        build_installer(shim_file.read())
+    build_installer(_read_file(build_shim(), "rb"))
 
 
 if __name__ == "__main__":
