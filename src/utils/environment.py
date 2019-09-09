@@ -10,7 +10,8 @@ class EnvironmentVariable(Enum):
 
 
 class MissingEnvironmentVariableError(Exception):
-    pass
+    def __init__(self, env_var: EnvironmentVariable):
+        self.env_var = env_var
 
 
 def _get_env_var(env_var: EnvironmentVariable, raise_missing: bool = False) -> object:

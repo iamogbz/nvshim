@@ -33,6 +33,7 @@ jobs:
     - name: Run sanities
       env:
         NVSHIM_AUTO_INSTALL: true
+        NVSHIM_VERBOSE: true
       run: |
         make sanities
     - name: Run semantic release

@@ -199,8 +199,8 @@ def main():
     try:
         nvm_dir = environment.get_nvm_dir()
     except environment.MissingEnvironmentVariableError as error:
-        message.print_env_var_missing(error.message)
-        raise
+        message.print_env_var_missing(error.env_var)
+        exit(ErrorCode.ENV_NVM_DIR_MISSING)
 
     bin_path = get_bin_path(
         version=version,
