@@ -14,7 +14,8 @@ PYTEST_EXEC = $(WITH_ENV) $(VENV_PYTEST)
 COVERAGE_EXEC = $(WITH_ENV) $(VENV_COVERAGE)
 
 PROFILE = $(HOME)/.profile
-NVSHIM_BIN = $(HOME)/.nvshim/bin
+NVM_DIR = $(HOME)/.nvm
+NVSHIM_BIN = env NVM_DIR=$(NVM_DIR) $(HOME)/.nvshim/bin
 
 .PHONY: upstream
 upstream:
@@ -92,9 +93,9 @@ sanity:
 	. $(PROFILE) && nvm install stable
 	./dist/installer ~/.nvshim/bin $(PROFILE)
 	echo 'lts/dubnium' > .nvmrc
-	$(NVSHIM_BIN)/node --version
-	$(NVSHIM_BIN)/npm --version
-	$(NVSHIM_BIN)/npx --version
+	$(NVSHIM_BIN)/node --version | grep -q 'v10.16.3' && echo 'success' || exit 1
+	$(NVSHIM_BIN)/npm --version | grep -q '6.9.0' && echo 'success' || exit 1
+	$(NVSHIM_BIN)/npx --version | grep -q '6.9.0' && echo 'success' || exit 1
 
 .PHONY: lint
 lint:
