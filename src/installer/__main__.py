@@ -11,7 +11,11 @@ from utils import message
 def parse_args(args: Sequence[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Install node version manager shim")
     parser.add_argument(
-        "install_path", type=str, help="Path to location for node shims installation"
+        "install_path",
+        type=str,
+        nargs="?",
+        help="Path to location for node shims installation",
+        default=os.path.join(os.path.expanduser("~"), ".nvshim"),
     )
     parser.add_argument(
         "profile_path",
@@ -23,10 +27,11 @@ def parse_args(args: Sequence[str]) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def install_shims(shim_bin: bytes, path: str):
+def install_shims(shim_bin: bytes, install_path: str):
+    os.makedirs(install_path, exist_ok=True)
     shim_names = ["node", "npm", "npx"]
     for name in shim_names:
-        file_path = os.path.join(path, name)
+        file_path = os.path.join(install_path, name)
         with open(file_path, "wb") as shim_file:
             shim_file.write(shim_bin)
             os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
