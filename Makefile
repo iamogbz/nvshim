@@ -69,6 +69,10 @@ coverage:
 	@$(COVERAGE_EXEC) run --source=. -m pytest
 	@$(VENV_COVERAGE) html
 
+.PHONY: report
+report:
+	$(VENV_COVERAGE) xml && $(VENV_BIN)coveralls
+
 .PHONY: run
 run:
 	$(PYTHON_EXEC) ./src/nvshim $(args)
