@@ -50,7 +50,7 @@ def build_installer(shim_bin: bytes):
     try:
         _write_file(
             py_file_path,
-            original_content.replace("{SHIM_BIN_PLACEHOLDER}", str(shim_bin)),
+            original_content.replace('{"__SHIM_BIN_PLACEHOLDER__"}', str(shim_bin)),
         )
         return _build_dist(name)
     finally:

@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import stat
 import sys
 from typing import Sequence
@@ -23,7 +24,7 @@ def parse_args(args: Sequence[str]) -> argparse.Namespace:
 
 
 def install_shims(path: str):
-    shim_bin = {SHIM_BIN_PLACEHOLDER}
+    shim_bin = {"__SHIM_BIN_PLACEHOLDER__"}
     shim_names = ["node", "npm", "npx"]
     for name in shim_names:
         file_path = os.path.join(path, name)
@@ -32,22 +33,37 @@ def install_shims(path: str):
             os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
 
 
-def configure_profile(profile_path: str):
-    profile_section = "## NVSHIM'D"
-    with open(profile_path) as profile:
-        initial_profile = profile.read()
+def configure_profile(configuration: str, profile_path: str):
+    profile_section = "## NVSHIM: DO NOT MODIFY"
+    initial_profile = ""
 
-    modified_profile = initial_profile
+    if os.path.exists(profile_path):
+        with open(profile_path, "r") as profile:
+            initial_profile = profile.read()
 
-    with open(profile_path) as profile:
+    wrapped_config = "\n".join([profile_section, configuration, profile_section])
+    if profile_section in initial_profile:
+        modified_profile = re.sub(
+            pattern=f"{profile_section}(.|\\s)*{profile_section}",
+            repl=wrapped_config,
+            string=initial_profile,
+        )
+    else:
+        modified_profile = "\n".join(filter(bool, [initial_profile, wrapped_config]))
+
+    with open(profile_path, "w+") as profile:
         profile.write(modified_profile)
+
+
+def configure_sh(install_path: str, profile_path: str):
+    configure_profile(f"export PATH='{install_path}:$PATH'", profile_path)
 
 
 def main():
     args = parse_args(sys.argv[1:])
     install_shims(args.install_path)
     if args.profile_path:
-        configure_profile(args.profile_path)
+        configure_sh(args.install_path, args.profile_path)
 
 
 if __name__ == "__main__":

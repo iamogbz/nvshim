@@ -75,7 +75,7 @@ report:
 
 .PHONY: run
 run:
-	$(PYTHON_EXEC) ./src/nvshim $(args)
+	$(PYTHON_EXEC) $(py) $(args)
 
 .PHONY: build
 build:
