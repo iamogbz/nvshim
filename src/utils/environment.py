@@ -28,6 +28,10 @@ def is_version_auto_install_enabled() -> bool:
     return bool(_get_env_var(EnvironmentVariable.AUTO_INSTALL))
 
 
+def disable_version_auto_install():
+    os.environ.pop(EnvironmentVariable.AUTO_INSTALL.value, None)
+
+
 def is_verbose_logging() -> bool:
     return _get_env_var(EnvironmentVariable.VERBOSE)
 

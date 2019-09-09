@@ -13,6 +13,8 @@ PYTHON_EXEC = $(WITH_ENV) $(VENV_PYTHON)
 PYTEST_EXEC = $(WITH_ENV) $(VENV_PYTEST)
 COVERAGE_EXEC = $(WITH_ENV) $(VENV_COVERAGE)
 
+PROFILE = $(HOME)/.profile
+
 .PHONY: upstream
 upstream:
 	@git remote add upstream https://github.com/iamogbz/py-boilerplate
@@ -84,14 +86,14 @@ build: clean
 
 .PHONY: sanity
 sanity:
-	touch ~/.profile
-	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=~/.profile bash
-	bash -l -c 'nvm install stable'
-	./dist/installer ~/.nvshim/bin ~/.profile
-	bash -l -c 'node --version'
-	bash -l -c 'npm --version'
-	bash -l -c 'npx --version'
-	rm -rf ~/.nvshim
+	touch $(PROFILE)
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
+	. $(PROFILE) && nvm install stable
+	./dist/installer ~/.nvshim/bin $(PROFILE)
+	echo 'lts/dubnium' > .nvmrc
+	. $(PROFILE) && node --version
+	. $(PROFILE) && npm --version
+	. $(PROFILE) && npx --version
 
 .PHONY: lint
 lint:
