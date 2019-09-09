@@ -61,9 +61,10 @@ def configure_sh(install_path: str, profile_path: str):
 
 def main():
     args = parse_args(sys.argv[1:])
-    install_shims(args.install_path)
+    install_path = os.path.realpath(args.install_path)
+    install_shims(install_path)
     if args.profile_path:
-        configure_sh(args.install_path, args.profile_path)
+        configure_sh(install_path, args.profile_path)
 
 
 if __name__ == "__main__":
