@@ -130,12 +130,17 @@ def get_nvmrc_path(exec_dir: str = os.getcwd()) -> str:
     return current_config if config_found else None
 
 
-def get_nvmrc(nvmrc_path: str = None) -> str:
+def get_nvmrc(nvmrc_path: str = None) -> (str, bool):
+    version = "default"
     if nvmrc_path:
         with open(nvmrc_path) as f:
-            return str(parse_version(f.readline().strip()))
+            rc_version = f.readline().strip()
+            parsed_version = parse_version(rc_version)
+            if parsed_version:
+                return str(parsed_version), True
+            version = rc_version
 
-    return "default"
+    return version, False
 
 
 def get_nvmsh_path(nvm_dir: str) -> str:
@@ -144,14 +149,14 @@ def get_nvmsh_path(nvm_dir: str) -> str:
 
 def get_bin_path(
     *,
-    rc_version: str,
+    version: str,
+    version_parsed: bool,
     node_versions: VersionMapping,
     bin_file: str,
     node_versions_dir: str,
     nvm_sh_path: str,
 ):
-    version = parse_version(rc_version)
-    pretty_version = f"v{version}" if version else rc_version
+    pretty_version = f"v{version}" if version_parsed else version
     try:
         node_path = node_versions[version]
     except KeyError:
@@ -159,7 +164,9 @@ def get_bin_path(
             message.print_version_not_installed(pretty_version)
             sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
 
-        process.run(f"source {nvm_sh_path} && nvm install {rc_version}", shell="bash")
+        process.run(
+            f"source {nvm_sh_path} && nvm install {pretty_version}", shell="bash"
+        )
         node_path = get_node_version_bin_dir(node_versions_dir, version)
 
     bin_path = os.path.join(node_path, bin_file)
@@ -198,7 +205,7 @@ def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
 def main():
     parsed_args, unknown_args = parse_args(sys.argv[1:])
     nvmrc_path = get_nvmrc_path()
-    rc_version = get_nvmrc(nvmrc_path)
+    version, parsed = get_nvmrc(nvmrc_path)
     try:
         nvm_dir = environment.get_nvm_dir()
     except environment.MissingEnvironmentVariableError as error:
@@ -206,7 +213,8 @@ def main():
         sys.exit(ErrorCode.ENV_NVM_DIR_MISSING)
 
     bin_path = get_bin_path(
-        rc_version=rc_version,
+        version=version,
+        version_parsed=parsed,
         node_versions=merge_nvm_aliases_with_node_versions(
             resolve_nvm_aliases(get_nvm_aliases(get_nvm_aliases_dir(nvm_dir))),
             get_node_versions(get_node_versions_dir(nvm_dir)),
@@ -215,7 +223,7 @@ def main():
         bin_file=parsed_args.bin_file,
         nvm_sh_path=get_nvmsh_path(nvm_dir),
     )
-    message.print_using_version(rc_version, bin_path, nvmrc_path)
+    message.print_using_version(version, bin_path, nvmrc_path)
     process.run(bin_path, *parsed_args.bin_args, *unknown_args)
 
 
