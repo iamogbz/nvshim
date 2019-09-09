@@ -48,7 +48,7 @@ def print_env_var_missing(env_var: EnvironmentVariable):
 
 def print_using_version(version: str, bin_path: str, nvmrc_path: str = None):
     messages = (
-        f"Found '{nvmrc_path}' with version <v{version}>"
+        f"Found '{nvmrc_path}' with version <{version}>"
         if nvmrc_path
         else f"Using <{version}> version",
         f"\n.{bin_path}\n",
@@ -61,10 +61,10 @@ def print_node_bin_file_does_not_exist(bin_path: str):
 
 
 def print_version_not_installed(version: str):
-    _print_error(f"N/A version 'v{version}' is not yet installed.\n")
+    _print_error(f"N/A version '{version}' is not yet installed.\n")
     _print(
         "You need to run",
-        _stylize(f"'nvm install v{version}'", Color.NOTICE),
+        _stylize(f"'nvm install {version}'", Color.NOTICE),
         "to install it before using it.\n",
     )
     _print(
@@ -83,3 +83,15 @@ def print_updated_profile(profile_path: str, configuration: str):
         f"Successfully updated profile: {profile_path}\n{configuration}",
         level=MessageLevel.QUIET,
     )
+
+
+def print_install_complete():
+    _print(f"Installation completed successfully")
+
+
+def print_installing_version(version_number: str):
+    _print(f"Installing shim version {version_number}")
+
+
+def print_running_version(version_number: str):
+    _print(f"Executing shim version {version_number}", level=MessageLevel.QUIET)

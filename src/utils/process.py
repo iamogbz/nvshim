@@ -1,6 +1,9 @@
 import os
 import subprocess
+import sys
 from typing import Dict
+
+from .environment import disable_version_auto_install
 
 
 def _with_venv(env: Dict[str, str]):
@@ -11,8 +14,9 @@ def _with_venv(env: Dict[str, str]):
 
 def run(*args, **kwargs):
     try:
+        disable_version_auto_install()
         subprocess.run(
             args, **kwargs, check=True, env=_with_venv(kwargs.get("env", os.environ))
         )
     except subprocess.CalledProcessError as error:
-        exit(error.returncode)
+        sys.exit(error.returncode)

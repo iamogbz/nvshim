@@ -6,6 +6,7 @@ from typing import Dict, List, Sequence
 
 import semver
 
+from compiler import __version__
 from utils import environment, message, process
 from utils.constants import ErrorCode
 
@@ -26,7 +27,7 @@ def get_files(path: str) -> [str]:
         for root, _, files in os.walk(path):
             for name in files:
                 yield os.path.join(root, name)
-    else:
+    elif os.path.exists(path):
         yield path
 
 
@@ -97,9 +98,10 @@ def get_node_version_bin_dir(node_versions_dir: str, version: str) -> str:
 
 
 def get_node_versions(node_versions_dir: str) -> VersionMapping:
+    files = os.listdir(node_versions_dir) if os.path.exists(node_versions_dir) else []
     return {
         str(v): get_node_version_bin_dir(node_versions_dir, str(v))
-        for v in map(parse_version, os.listdir(node_versions_dir))
+        for v in map(parse_version, files)
     }
 
 
@@ -129,40 +131,56 @@ def get_nvmrc_path(exec_dir: str = os.getcwd()) -> str:
     return current_config if config_found else None
 
 
-def get_nvmrc(nvmrc_path: str = None) -> str:
+def get_nvmrc(nvmrc_path: str = None) -> (str, bool):
+    version = "default"
     if nvmrc_path:
         with open(nvmrc_path) as f:
-            return str(parse_version(f.readline().strip()))
+            rc_version = f.readline().strip()
+            parsed_version = parse_version(rc_version)
+            if parsed_version:
+                return str(parsed_version), True
+            version = rc_version
 
-    return "default"
+    return version, False
 
 
 def get_nvmsh_path(nvm_dir: str) -> str:
     return os.path.join(nvm_dir, "nvm.sh")
 
 
+def _pretty_version(version: str, parsed: bool) -> str:
+    return f"v{version}" if parsed else version
+
+
 def get_bin_path(
     *,
     version: str,
+    is_version_parsed: bool,
+    nvm_aliases: AliasMapping,
     node_versions: VersionMapping,
     bin_file: str,
     node_versions_dir: str,
     nvm_sh_path: str,
 ):
+    version_mapping = merge_nvm_aliases_with_node_versions(nvm_aliases, node_versions)
     try:
-        node_path = node_versions[version]
+        node_path = version_mapping[version]
     except KeyError:
         if not environment.is_version_auto_install_enabled():
-            message.print_version_not_installed(version)
-            exit(ErrorCode.VERSION_NOT_INSTALLED)
+            message.print_version_not_installed(
+                _pretty_version(version, is_version_parsed)
+            )
+            sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
 
-        process.run(f"source {nvm_sh_path} && nvm install {version}", shell="bash")
-        node_path = get_node_version_bin_dir(node_versions_dir, version)
+        process.run(f". {nvm_sh_path} && nvm install {version}", shell="bash")
+        node_path = get_node_version_bin_dir(
+            node_versions_dir, version=nvm_aliases.get(version, version)
+        )
 
     bin_path = os.path.join(node_path, bin_file)
     if not os.path.exists(bin_path):
         message.print_node_bin_file_does_not_exist(bin_path)
-        exit(ErrorCode.EXECUTABLE_NOT_FOUND)
+        sys.exit(ErrorCode.EXECUTABLE_NOT_FOUND)
 
     return bin_path
 
@@ -192,27 +210,27 @@ def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
     return parser.parse_known_args(args)
 
 
-def main():
+def main(version_number: str = __version__):
+    message.print_running_version(version_number)
     parsed_args, unknown_args = parse_args(sys.argv[1:])
     nvmrc_path = get_nvmrc_path()
-    version = get_nvmrc(nvmrc_path)
+    version, parsed = get_nvmrc(nvmrc_path)
     try:
         nvm_dir = environment.get_nvm_dir()
     except environment.MissingEnvironmentVariableError as error:
-        message.print_env_var_missing(error.message)
-        raise
+        message.print_env_var_missing(error.env_var)
+        sys.exit(ErrorCode.ENV_NVM_DIR_MISSING)
 
     bin_path = get_bin_path(
         version=version,
-        node_versions=merge_nvm_aliases_with_node_versions(
-            resolve_nvm_aliases(get_nvm_aliases(get_nvm_aliases_dir(nvm_dir))),
-            get_node_versions(get_node_versions_dir(nvm_dir)),
-        ),
+        is_version_parsed=parsed,
+        nvm_aliases=resolve_nvm_aliases(get_nvm_aliases(get_nvm_aliases_dir(nvm_dir))),
+        node_versions=get_node_versions(get_node_versions_dir(nvm_dir)),
         node_versions_dir=get_node_versions_dir(nvm_dir),
         bin_file=parsed_args.bin_file,
         nvm_sh_path=get_nvmsh_path(nvm_dir),
     )
-    message.print_using_version(version, bin_path, nvmrc_path)
+    message.print_using_version(_pretty_version(version, parsed), bin_path, nvmrc_path)
     process.run(bin_path, *parsed_args.bin_args, *unknown_args)
 
 

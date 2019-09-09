@@ -10,7 +10,8 @@ class EnvironmentVariable(Enum):
 
 
 class MissingEnvironmentVariableError(Exception):
-    pass
+    def __init__(self, env_var: EnvironmentVariable):
+        self.env_var = env_var
 
 
 def _get_env_var(env_var: EnvironmentVariable, raise_missing: bool = False) -> object:
@@ -25,6 +26,10 @@ def _get_env_var(env_var: EnvironmentVariable, raise_missing: bool = False) -> o
 
 def is_version_auto_install_enabled() -> bool:
     return bool(_get_env_var(EnvironmentVariable.AUTO_INSTALL))
+
+
+def disable_version_auto_install():
+    os.environ.pop(EnvironmentVariable.AUTO_INSTALL.value, None)
 
 
 def is_verbose_logging() -> bool:

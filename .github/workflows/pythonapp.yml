@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -24,13 +23,20 @@ jobs:
         make coverage
     - name: Report coverage
       env:
-        COVERALLS_REPO_TOKEN: eezwlMAKGWeIqbd9uQuxuB3EZ1q683sHM
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         make report
     - name: Build distributables
       run: |
         make build
+    - name: Run sanities
+      env:
+        NVSHIM_AUTO_INSTALL: true
+        NVSHIM_VERBOSE: true
+      run: |
+        make sanity
     - name: Run semantic release
-      if: github.ref == 'master'
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         make deploy

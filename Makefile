@@ -8,10 +8,15 @@ VENV_PYTEST = $(VENV_BIN)pytest
 VENV_PYTHON = $(VENV_BIN)python
 VENV_COVERAGE = $(VENV_BIN)coverage
 VENV_BLACK = $(VENV_BIN)black
+VENV_RELEASE = $(VENV_BIN)semantic-release$(shell [ '$(GITHUB_REF)' = 'master' ] && echo '' || echo ' --noop')
 
 PYTHON_EXEC = $(WITH_ENV) $(VENV_PYTHON)
 PYTEST_EXEC = $(WITH_ENV) $(VENV_PYTEST)
 COVERAGE_EXEC = $(WITH_ENV) $(VENV_COVERAGE)
+
+PROFILE = $(HOME)/.profile
+NVM_DIR = $(HOME)/.nvm
+NVSHIM_BIN = env NVM_DIR=$(NVM_DIR) $(HOME)/.nvshim/bin/
 
 .PHONY: upstream
 upstream:
@@ -80,7 +85,18 @@ run:
 .PHONY: build
 build: clean
 	@mkdir -p ./artifacts
-	@$(PYTHON_EXEC) ./src/compile
+	@$(PYTHON_EXEC) ./src/compiler
+
+.PHONY: sanity
+sanity:
+	touch $(PROFILE)
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
+	. $(PROFILE) && nvm install stable
+	./dist/installer ~/.nvshim/bin $(PROFILE)
+	echo 'lts/dubnium' > .nvmrc
+	$(NVSHIM_BIN)node --version | grep -q 'v10.16.3' && echo 'success' || exit 1
+	$(NVSHIM_BIN)npm --version | grep -q '6.9.0' && echo 'success' || exit 1
+	$(NVSHIM_BIN)npx --version | grep -q '6.9.0' && echo 'success' || exit 1
 
 .PHONY: lint
 lint:
@@ -92,7 +108,7 @@ format:
 
 .PHONY: deploy
 deploy:
-	echo "Run semantic release"
+	echo "$(VENV_RELEASE) publish"
 
 ifndef VERBOSE
 .SILENT:
