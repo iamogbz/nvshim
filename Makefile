@@ -8,6 +8,7 @@ VENV_PYTEST = $(VENV_BIN)pytest
 VENV_PYTHON = $(VENV_BIN)python
 VENV_COVERAGE = $(VENV_BIN)coverage
 VENV_BLACK = $(VENV_BIN)black
+VENV_RELEASE = $(VENV_BIN)semantic-release
 
 PYTHON_EXEC = $(WITH_ENV) $(VENV_PYTHON)
 PYTEST_EXEC = $(WITH_ENV) $(VENV_PYTEST)
@@ -107,7 +108,7 @@ format:
 
 .PHONY: deploy
 deploy:
-	$(VENV_BIN)semantic-release publish
+	$(VENV_RELEASE) publish
 
 ifndef VERBOSE
 .SILENT:

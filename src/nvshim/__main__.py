@@ -6,6 +6,7 @@ from typing import Dict, List, Sequence
 
 import semver
 
+from compiler import __version__
 from utils import environment, message, process
 from utils.constants import ErrorCode
 
@@ -209,7 +210,8 @@ def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
     return parser.parse_known_args(args)
 
 
-def main():
+def main(version_number: str = __version__):
+    message.print_running_version(version_number)
     parsed_args, unknown_args = parse_args(sys.argv[1:])
     nvmrc_path = get_nvmrc_path()
     version, parsed = get_nvmrc(nvmrc_path)

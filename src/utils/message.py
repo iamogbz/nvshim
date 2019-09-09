@@ -87,3 +87,11 @@ def print_updated_profile(profile_path: str, configuration: str):
 
 def print_install_complete():
     _print(f"Installation completed successfully")
+
+
+def print_installing_version(version_number: str):
+    _print(f"Installing shim version {version_number}")
+
+
+def print_running_version(version_number: str):
+    _print(f"Executing shim version {version_number}", level=MessageLevel.QUIET)

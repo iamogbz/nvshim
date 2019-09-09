@@ -5,6 +5,7 @@ import stat
 import sys
 from typing import Sequence
 
+from compiler import __version__
 from utils import message
 
 
@@ -65,7 +66,8 @@ def configure_sh(install_path: str, profile_path: str):
     configure_profile(f'export PATH="{install_path}:$PATH"', profile_path)
 
 
-def main(shim_bin: bytes):
+def main(shim_bin: bytes, version_number: str = __version__):
+    message.print_installing_version(version_number)
     args = parse_args(sys.argv[1:])
     install_path = os.path.realpath(args.install_path)
     install_shims(shim_bin, install_path)
