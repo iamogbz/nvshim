@@ -32,18 +32,19 @@ def get_files(path: str) -> [str]:
         yield path
 
 
-def _run_nvm_cmd(nvm_sh_path: str, args: str) -> process.subprocess.CompletedProcess:
+def _run_nvm_cmd(
+    nvm_sh_path: str, nvm_args: str, **kwargs: dict
+) -> process.subprocess.CompletedProcess:
     return process.run(
-        f". {nvm_sh_path} && nvm {args}",
-        shell="bash",
-        encoding="UTF-8",
-        capture_output=True,
+        f". {nvm_sh_path} && nvm {nvm_args}", shell="bash", encoding="UTF-8", **kwargs
     )
 
 
 @functools.lru_cache(maxsize=None)
 def get_nvm_stable_version(nvm_dir) -> str:
-    output = _run_nvm_cmd(get_nvmsh_path(nvm_dir), "alias stable").stdout
+    output = _run_nvm_cmd(
+        get_nvmsh_path(nvm_dir), "alias stable", capture_output=True
+    ).stdout
     result = re.sub(r"\x1B[@-_][0-?]*[ -/]*[@-~]", "", str(output).strip())
     try:
         return re.findall(r"> v([\w\.]+)", result)[0]

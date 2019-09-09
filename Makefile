@@ -18,7 +18,8 @@ COVERAGE_EXEC = $(WITH_ENV) $(VENV_COVERAGE)
 
 PROFILE = $(HOME)/.profile
 NVM_DIR = $(HOME)/.nvm
-NVSHIM_BIN = env NVM_DIR=$(NVM_DIR) $(HOME)/.nvshim/bin/
+NVSHIM_BIN = $(HOME)/.nvshim/bin/
+NVSHIM_EXEC = env NVM_DIR=$(NVM_DIR) $(NVSHIM_BIN)
 
 .PHONY: upstream
 upstream:
@@ -94,12 +95,11 @@ sanity:
 	touch $(PROFILE)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
 	. $(PROFILE) && nvm install stable
-	. $(PROFILE) && nvm alias stable
-	./dist/installer ~/.nvshim/bin $(PROFILE)
+	./dist/installer $(NVSHIM_BIN) $(PROFILE)
 	echo 'lts/dubnium' > .nvmrc
-	$(NVSHIM_BIN)node --version | grep -q 'v10.16.3' && echo 'success' || exit 1
-	$(NVSHIM_BIN)npm --version | grep -q '6.9.0' && echo 'success' || exit 1
-	$(NVSHIM_BIN)npx --version | grep -q '6.9.0' && echo 'success' || exit 1
+	$(NVSHIM_EXEC)node --version | grep -q 'v10.16.3' && echo 'success' || exit 1
+	$(NVSHIM_EXEC)npm --version | grep -q '6.9.0' && echo 'success' || exit 1
+	$(NVSHIM_EXEC)npx --version | grep -q '6.9.0' && echo 'success' || exit 1
 
 .PHONY: lint
 lint:

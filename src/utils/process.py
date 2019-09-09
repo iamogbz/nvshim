@@ -3,20 +3,21 @@ import subprocess
 import sys
 from typing import Dict
 
-from .environment import disable_version_auto_install
+from .environment import EnvironmentVariable, EnvDict, process_env
 
 
-def _with_venv(env: Dict[str, str]):
+def _with_venv(env: EnvDict):
     path_key = "PATH"
     env_path = env.get(path_key, "")
     return dict(env, **{path_key: f"venv/bin/:{env_path}"})
 
 
 def run(*args, **kwargs) -> subprocess.CompletedProcess:
+    env_vars = _with_venv(os.environ)
+    env_vars[EnvironmentVariable.AUTO_INSTALL.value] = "false"
+
     try:
-        disable_version_auto_install()
-        return subprocess.run(
-            args, **kwargs, check=True, env=_with_venv(kwargs.get("env", os.environ))
-        )
+        with process_env(env_vars):
+            return subprocess.run(args, **kwargs, check=True)
     except subprocess.CalledProcessError as error:
         sys.exit(error.returncode)
