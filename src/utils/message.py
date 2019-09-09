@@ -72,3 +72,14 @@ def print_version_not_installed(version: str):
         _stylize(f"'{EnvironmentVariable.AUTO_INSTALL.value}'", Color.NOTICE),
         "to auto install at run time.\n",
     )
+
+
+def print_installed_shim(shim_path: str):
+    _print(f"Installed shim: {shim_path}", level=MessageLevel.QUIET)
+
+
+def print_updated_profile(profile_path: str, configuration: str):
+    _print(
+        f"Successfully updated profile: {profile_path}\n{configuration}",
+        level=MessageLevel.QUIET,
+    )

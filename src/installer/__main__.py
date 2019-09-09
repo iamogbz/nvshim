@@ -5,7 +5,7 @@ import stat
 import sys
 from typing import Sequence
 
-from utils.process import run
+from utils import message
 
 
 def parse_args(args: Sequence[str]) -> argparse.Namespace:
@@ -23,14 +23,14 @@ def parse_args(args: Sequence[str]) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def install_shims(path: str):
-    shim_bin = {"__SHIM_BIN_PLACEHOLDER__"}
+def install_shims(shim_bin: bytes, path: str):
     shim_names = ["node", "npm", "npx"]
     for name in shim_names:
         file_path = os.path.join(path, name)
         with open(file_path, "wb") as shim_file:
             shim_file.write(shim_bin)
             os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
+            message.print_installed_shim(file_path)
 
 
 def configure_profile(configuration: str, profile_path: str):
@@ -53,16 +53,17 @@ def configure_profile(configuration: str, profile_path: str):
 
     with open(profile_path, "w+") as profile:
         profile.write(modified_profile)
+        message.print_updated_profile(profile_path, configuration)
 
 
 def configure_sh(install_path: str, profile_path: str):
-    configure_profile(f"export PATH='{install_path}:$PATH'", profile_path)
+    configure_profile(f'export PATH="{install_path}:$PATH"', profile_path)
 
 
-def main():
+def main(shim_bin: bytes):
     args = parse_args(sys.argv[1:])
     install_path = os.path.realpath(args.install_path)
-    install_shims(install_path)
+    install_shims(shim_bin, install_path)
     if args.profile_path:
         configure_sh(install_path, args.profile_path)
 

@@ -8,7 +8,7 @@ FileContents = Union[bytes, str]
 
 
 def _get_script_file_path(filename: str) -> str:
-    return os.path.realpath(os.path.join(__file__, f"../scripts/{filename}.py"))
+    return os.path.realpath(os.path.join(__file__, f"../{filename}.py"))
 
 
 def _read_file(path: str, mode: str = "r") -> FileContents:
