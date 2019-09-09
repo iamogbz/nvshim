@@ -30,6 +30,9 @@ jobs:
     - name: Build distributables
       run: |
         make build
+    - name: Run sanities
+      run: |
+        make sanities
     - name: Run semantic release
       if: github.ref == 'master'
       run: |
