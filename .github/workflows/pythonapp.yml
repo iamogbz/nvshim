@@ -24,11 +24,10 @@ jobs:
         make build
     - name: Run sanities
       env:
-        NVM_DIR: $HOME/.nvm
         NVSHIM_AUTO_INSTALL: true
         NVSHIM_VERBOSE: true
       run: |
-        make sanities
+        make sanity
     - name: Lint source files
       run: |
         make lint

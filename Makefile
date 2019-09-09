@@ -82,13 +82,14 @@ build: clean
 	@mkdir -p ./artifacts
 	@$(PYTHON_EXEC) ./src/compile
 
-.PHONY: sanities
-sanities:
-	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE='~/.profile' bash
+.PHONY: sanity
+sanity:
+	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
 	./dist/installer ~/.nvshim/bin ~/.profile
 	bash -l -c 'node --version'
 	bash -l -c 'npm --version'
 	bash -l -c 'npx --version'
+	rm -rf ~/.nvshim
 
 .PHONY: lint
 lint:
