@@ -72,6 +72,8 @@ def main(shim_bin: bytes):
     if args.profile_path:
         configure_sh(install_path, args.profile_path)
 
+    message.print_install_complete()
+
 
 if __name__ == "__main__":
     main()

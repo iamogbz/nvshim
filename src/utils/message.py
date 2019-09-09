@@ -83,3 +83,7 @@ def print_updated_profile(profile_path: str, configuration: str):
         f"Successfully updated profile: {profile_path}\n{configuration}",
         level=MessageLevel.QUIET,
     )
+
+
+def print_install_complete():
+    _print(f"Installation completed successfully")
