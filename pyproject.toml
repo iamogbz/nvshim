@@ -15,3 +15,8 @@ exclude = '''
   | dist
 )
 '''
+
+[tool.semantic_release]
+branch = 'master'
+version_source = 'tag'
+upload_to_pypi = false
