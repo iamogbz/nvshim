@@ -8,7 +8,7 @@ VENV_PYTEST = $(VENV_BIN)pytest
 VENV_PYTHON = $(VENV_BIN)python
 VENV_COVERAGE = $(VENV_BIN)coverage
 VENV_BLACK = $(VENV_BIN)black
-VENV_RELEASE = $(VENV_BIN)semantic-release
+VENV_RELEASE = $(VENV_BIN)semantic-release$(shell [ '$(GITHUB_REF)' = 'master' ] && echo '' || echo ' --noop')
 
 PYTHON_EXEC = $(WITH_ENV) $(VENV_PYTHON)
 PYTEST_EXEC = $(WITH_ENV) $(VENV_PYTEST)
