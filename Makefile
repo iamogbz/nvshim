@@ -1,9 +1,17 @@
 $(shell test -s ".env" || cp ".env.example" ".env")
 ENVARS := $(shell cat ".env" | xargs)
+WITH_ENV = env $(ENVARS)
+
 VENV_BIN = venv/bin/
-PIP_EXEC = $(VENV_BIN)pip
-PYTHON_EXEC = env $(ENVARS) $(VENV_BIN)python
-PYTEST_EXEC = env $(ENVARS) pytest
+VENV_PIP = $(VENV_BIN)pip
+VENV_PYTEST = $(VENV_BIN)pytest
+VENV_PYTHON = $(VENV_BIN)python
+VENV_COVERAGE = $(VENV_BIN)coverage
+VENV_BLACK = $(VENV_BIN)black
+
+PYTHON_EXEC = $(WITH_ENV) $(VENV_PYTHON)
+PYTEST_EXEC = $(WITH_ENV) $(VENV_PYTEST)
+COVERAGE_EXEC = $(WITH_ENV) $(VENV_COVERAGE)
 
 .PHONY: upstream
 upstream:
@@ -38,8 +46,8 @@ venv:
 
 .PHONY: install
 install: venv
-	$(PIP_EXEC) install --upgrade pip
-	$(PIP_EXEC) install -Ur requirements.txt
+	$(VENV_PIP) install --upgrade pip
+	$(VENV_PIP) install -Ur requirements.txt
 	$(PYTHON_EXEC) -m python_githooks
 
 .PHONY: clean
@@ -58,8 +66,8 @@ test:
 
 .PHONY: coverage
 coverage:
-	@env $(ENVARS) coverage run --source=. -m pytest
-	@coverage html
+	@$(COVERAGE_EXEC) run --source=. -m pytest
+	@$(VENV_COVERAGE) html
 
 .PHONY: run
 run:
@@ -72,11 +80,11 @@ build:
 
 .PHONY: lint
 lint:
-	black . --check
+	$(VENV_BLACK) . --check
 
 .PHONY: format
 format:
-	black .
+	$(VENV_BLACK) .
 
 .PHONY: deploy
 deploy:
