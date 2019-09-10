@@ -3,18 +3,14 @@ ENVARS := $(shell cat ".env" | xargs)
 WITH_ENV = env $(ENVARS)
 
 VENV_BIN = venv/bin/
-VENV_PIP = $(VENV_BIN)pip
-VENV_PYTEST = $(VENV_BIN)pytest
-VENV_PYTHON = $(VENV_BIN)python
-VENV_COVERAGE = $(VENV_BIN)coverage
-VENV_BLACK = $(VENV_BIN)black
+PIP_EXEC = $(VENV_BIN)pip
+PYTEST_EXEC = $(WITH_ENV) $(VENV_BIN)pytest
+PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
+COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
+BLACK_EXEC = $(VENV_BIN)black
 
 RELEASE_FLAGS = $(shell [ '$(GITHUB_REF)' = 'refs/heads/master' ] && echo '' || echo ' --noop')
-VENV_RELEASE = $(VENV_BIN)semantic-release$(RELEASE_FLAGS)
-
-PYTHON_EXEC = $(WITH_ENV) $(VENV_PYTHON)
-PYTEST_EXEC = $(WITH_ENV) $(VENV_PYTEST)
-COVERAGE_EXEC = $(WITH_ENV) $(VENV_COVERAGE)
+RELEASE_EXEC = $(VENV_BIN)semantic-release$(RELEASE_FLAGS)
 
 PROFILE = $(HOME)/.profile
 NVM_DIR = $(HOME)/.nvm
@@ -54,8 +50,8 @@ venv:
 
 .PHONY: install
 install: venv
-	$(VENV_PIP) install --upgrade pip
-	$(VENV_PIP) install -Ur requirements.txt
+	$(PIP_EXEC) install --upgrade pip
+	$(PIP_EXEC) install -Ur requirements.txt
 	$(PYTHON_EXEC) -m python_githooks
 
 .PHONY: clean
@@ -76,11 +72,11 @@ test:
 .PHONY: coverage
 coverage: src
 	@$(COVERAGE_EXEC) run --source=. -m pytest
-	@$(VENV_COVERAGE) html
+	@$(COVERAGE_EXEC) html
 
 .PHONY: report
 report:
-	$(VENV_COVERAGE) xml && $(VENV_BIN)coveralls
+	$(COVERAGE_EXEC) xml && $(VENV_BIN)coveralls
 
 .PHONY: run
 run:
@@ -109,15 +105,15 @@ sanity:
 
 .PHONY: lint
 lint:
-	$(VENV_BLACK) . --check
+	$(BLACK_EXEC) . --check
 
 .PHONY: format
 format:
-	$(VENV_BLACK) .
+	$(BLACK_EXEC) .
 
 .PHONY: deploy
 deploy:
-	echo "$(VENV_RELEASE) publish"
+	echo "$(RELEASE_EXEC) publish"
 
 ifndef VERBOSE
 .SILENT:
