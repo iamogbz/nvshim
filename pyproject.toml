@@ -10,6 +10,7 @@ exclude = '''
   | \.pytest_cache
   | \.tox
   | \.venv
+  | \.vscode
   | venv
   | build
   | dist
