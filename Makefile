@@ -41,6 +41,7 @@ help:
 	@echo "make tests                        - run all tests"
 	@echo "make coverage                     - run all tests and collect coverage"
 	@echo "make build                        - build executable from src"
+	@echo "make dist                         - make distributables for release"
 	@echo "make deploy                       - run semantic release on built distributables"
 
 .PHONY: venv
