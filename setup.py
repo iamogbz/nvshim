@@ -60,6 +60,7 @@ setup(
     author="Emmanuel Ogbizi-Ugbe",
     author_email="iamogbz+pypi@gmail.com",
     description="Automagically use the correct version of node",
+    include_package_data=True,
     install_requires=get_requirements("requirements/prod.txt", []),
     keywords="node nvm node-shim shim shell nvm-shim",
     long_description=readme(),
