@@ -12,7 +12,7 @@ def get_requirements(filepath: str, parents: [str]) -> [str]:
     with open(filepath) as f:
         parents.append(filepath)
         while True:
-            line = f.readline()
+            line = f.readline().strip()
             req_file_delim = "-r"
             req_package_delim = "=="
             if not line:
@@ -48,7 +48,7 @@ setup(
     license="GNU",
     name="nvshim",
     scripts=[f"dist/{filename}" for filename in ["node", "npm", "npx"]],
-    tests_require=["pytest", "snapshottest"],
+    tests_require=test_requirements(),
     url="http://github.com/iamogbz/nvshim",
     version=__version__,
 )
