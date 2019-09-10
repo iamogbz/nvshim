@@ -60,9 +60,10 @@ install: venv
 
 .PHONY: clean
 clean:
-	rm -rf artifacts
+	rm -rf artifacts/*
 	rm -rf build
 	rm -rf dist
+	rm -rf *.egg-info
 
 .PHONY: tests
 tests:
@@ -73,7 +74,7 @@ test:
 	$(PYTEST_EXEC) -s -k $(keyword)
 
 .PHONY: coverage
-coverage:
+coverage: src
 	@$(COVERAGE_EXEC) run --source=. -m pytest
 	@$(VENV_COVERAGE) html
 
@@ -85,10 +86,15 @@ report:
 run:
 	$(PYTHON_EXEC) $(py) $(args)
 
-.PHONY: build
-build: clean
-	@mkdir -p ./artifacts
+build: src
+	make clean
 	@$(PYTHON_EXEC) ./src/compiler
+	@touch build
+
+dist: build
+	dist/installer dist
+	@$(PYTHON_EXEC) setup.py sdist bdist_wheel
+	@touch dist
 
 .PHONY: sanity
 sanity:
