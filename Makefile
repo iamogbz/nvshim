@@ -10,7 +10,7 @@ COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
 BLACK_EXEC = $(VENV_BIN)black
 
 RELEASE_FLAGS = $(shell [ '$(GITHUB_REF)' = 'refs/heads/master' ] && echo '' || echo ' --noop')
-RELEASE_EXEC = $(VENV_BIN)semantic-release$(RELEASE_FLAGS)
+RELEASE_EXEC = $(PYTHON_EXEC) release.py$(RELEASE_FLAGS)
 
 PROFILE = $(HOME)/.profile
 NVM_DIR = $(HOME)/.nvm
