@@ -50,7 +50,7 @@ def configure_profile(config: str, *paths: [str]):
         profile_content = ""
         if os.path.exists(profile_path):
             with open(profile_path, "r") as profile:
-                profile_content = profile.read()
+                profile_content = profile.read().strip()
 
         profile_config = _with_border(f"\n{config}\n")
         if config_border in profile_content:
@@ -61,9 +61,9 @@ def configure_profile(config: str, *paths: [str]):
             )
         else:
             modified_profile = (
-                f"{profile_content}{profile_config}"
+                f"{profile_content}\n{profile_config}"
                 if profile_content
-                else profile_config
+                else f"{profile_config}\n"
             )
 
         with open(profile_path, "w+") as profile:
