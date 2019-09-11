@@ -1,8 +1,13 @@
+import sys
+
+sys.path.append("src")
+
 import os
 from setuptools import setup
 from typing import Sequence
 
 from compiler import __version__
+from utils.constants import shims
 
 
 def readme() -> str:
@@ -73,13 +78,7 @@ setup(
         "Topic :: Software Development",
     ],
     description="Automagically use the correct version of node",
-    entry_points={
-        "console_scripts": [
-            "node=src.compiler.shim",
-            "npm=src.compiler.shim",
-            "npx=src.compiler.shim",
-        ]
-    },
+    entry_points={"console_scripts": [f"{s}=src.compiler.shim:entry" for s in shims]},
     include_package_data=True,
     install_requires=get_requirements("requirements/prod.txt", []),
     keywords="node nvm node-shim shim shell nvm-shim",
