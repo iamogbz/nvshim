@@ -37,6 +37,9 @@ jobs:
         make sanity
     - name: Run semantic release
       env:
+        DEBUG: "*"
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         make deploy
