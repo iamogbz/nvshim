@@ -21,8 +21,6 @@ pip install nvshim
 
 ### Build
 
-This requires having `git` and `pip` or `make` configured for your terminal.
-
 #### Clone project repository
 
 ```sh
