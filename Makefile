@@ -83,18 +83,14 @@ report:
 run:
 	$(PYTHON_EXEC) $(py) $(args)
 
-build: src
-	make clean
+build: clean
 	@$(PYTHON_EXEC) ./src/compiler
-	@touch build
 
 dist: build
 	dist/installer dist
-	@touch dist
 
 .PHONY: setup
-setup: src
-	make clean
+setup: clean
 	@$(PYTHON_EXEC) setup.py sdist bdist_wheel
 
 .PHONY: shim
