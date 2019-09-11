@@ -41,7 +41,7 @@ help:
 	@echo "make tests                        - run all tests"
 	@echo "make coverage                     - run all tests and collect coverage"
 	@echo "make build                        - build executable from src"
-	@echo "make dist                         - make distributables for release"
+	@echo "make setup                        - run pip setup to install shim for development"
 	@echo "make deploy                       - run semantic release on built distributables"
 
 .PHONY: venv
@@ -85,16 +85,10 @@ run:
 
 build: clean
 	@$(PYTHON_EXEC) ./src/compiler
-
-dist: build
-	dist/installer dist
-
-.PHONY: setup
-setup: clean
 	@$(PYTHON_EXEC) setup.py sdist bdist_wheel
 
-.PHONY: shim
-shim: setup
+.PHONY: setup
+setup:
 	$(WITH_ENV) DISTUTILS_DEBUG=1 $(PIP_EXEC) install . -vvv
 
 .PHONY: sanity
