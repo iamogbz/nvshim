@@ -104,6 +104,7 @@ sanities:
 sanity.check:
 	$(exec) --version | grep -q '$(match)' && echo 'success' || exit 1
 
+.PHONY: sanity.pip
 sanity.pip:
 	$(PYTHON_SETUP) install
 	echo 'lts/carbon' > .nvmrc
@@ -111,6 +112,7 @@ sanity.pip:
 	make sanity.check exec=npm version="6.4.1"
 	make sanity.check exec=npx version="6.4.1"
 
+.PHONY: sanity.build
 sanity.build:
 	./dist/installer $(NVSHIM_BIN) $(PROFILE) ~/.bashrc
 	echo 'lts/dubnium' > .nvmrc
