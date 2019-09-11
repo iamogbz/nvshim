@@ -6,8 +6,8 @@ import stat
 import sys
 from typing import Sequence
 
-from compiler import __version__
-from utils import message
+from nvshim.compiler import __version__
+from nvshim.utils import constants, message
 
 
 def parse_args(args: Sequence[str]) -> argparse.Namespace:
@@ -31,8 +31,7 @@ def parse_args(args: Sequence[str]) -> argparse.Namespace:
 
 def install_shims(shim_bin: bytes, install_path: str):
     os.makedirs(install_path, exist_ok=True)
-    shim_names = ["node", "npm", "npx"]
-    for name in shim_names:
+    for name in constants.shims:
         file_path = os.path.join(install_path, name)
         with open(file_path, "wb") as shim_file:
             shim_file.write(shim_bin)

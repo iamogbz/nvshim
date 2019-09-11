@@ -34,9 +34,12 @@ jobs:
         NVSHIM_AUTO_INSTALL: true
         NVSHIM_VERBOSE: true
       run: |
-        make sanity
+        make sanities
     - name: Run semantic release
       env:
+        DEBUG: "*"
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         make deploy

@@ -9,6 +9,7 @@ PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
 COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
 BLACK_EXEC = $(VENV_BIN)black
 
+PYTHON_SETUP = $(PYTHON_EXEC) setup.py
 RELEASE_FLAGS = $(shell [ '$(GITHUB_REF)' = 'refs/heads/master' ] && echo '' || echo ' --noop')
 RELEASE_EXEC = $(VENV_BIN)semantic-release$(RELEASE_FLAGS)
 
@@ -41,6 +42,7 @@ help:
 	@echo "make tests                        - run all tests"
 	@echo "make coverage                     - run all tests and collect coverage"
 	@echo "make build                        - build executable from src"
+	@echo "make setup                        - run pip setup to install shim for development"
 	@echo "make deploy                       - run semantic release on built distributables"
 
 .PHONY: venv
@@ -56,9 +58,10 @@ install: venv
 
 .PHONY: clean
 clean:
-	rm -rf artifacts
+	rm -rf artifacts/*
 	rm -rf build
 	rm -rf dist
+	rm -rf *.egg-info
 
 .PHONY: tests
 tests:
@@ -81,21 +84,41 @@ report:
 run:
 	$(PYTHON_EXEC) $(py) $(args)
 
-.PHONY: build
 build: clean
-	@mkdir -p ./artifacts
-	@$(PYTHON_EXEC) ./src/compiler
+	@$(PYTHON_EXEC) src/nvshim/compiler
+	@$(PYTHON_SETUP) sdist bdist_wheel
 
-.PHONY: sanity
-sanity:
+.PHONY: setup
+setup:
+	$(WITH_ENV) DISTUTILS_DEBUG=1 $(PIP_EXEC) install . -vvv
+
+.PHONY: sanities
+sanities:
 	touch $(PROFILE)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
 	. $(PROFILE) && nvm install stable
+	make sanity.pip
+	make sanity.build
+
+.PHONY: sanity.check
+sanity.check:
+	$(exec) --version | grep -q '$(match)' && echo 'success' || exit 1
+
+.PHONY: sanity.pip
+sanity.pip:
+	$(PYTHON_SETUP) install
+	echo 'lts/carbon' > .nvmrc
+	make sanity.check exec=node version="v8.16.1"
+	make sanity.check exec=npm version="6.4.1"
+	make sanity.check exec=npx version="6.4.1"
+
+.PHONY: sanity.build
+sanity.build:
 	./dist/installer $(NVSHIM_BIN) $(PROFILE) ~/.bashrc
 	echo 'lts/dubnium' > .nvmrc
-	$(NVSHIM_EXEC)node --version | grep -q 'v10.16.3' && echo 'success' || exit 1
-	$(NVSHIM_EXEC)npm --version | grep -q '6.9.0' && echo 'success' || exit 1
-	$(NVSHIM_EXEC)npx --version | grep -q '6.9.0' && echo 'success' || exit 1
+	make sanity.check exec=$(NVSHIM_EXEC)node version="v10.16.3"
+	make sanity.check exec=$(NVSHIM_EXEC)npm version="6.9.0"
+	make sanity.check exec=$(NVSHIM_EXEC)npx version="6.9.0"
 
 .PHONY: lint
 lint:

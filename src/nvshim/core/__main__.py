@@ -7,9 +7,9 @@ from typing import Dict, List, Sequence
 
 import semver
 
-from compiler import __version__
-from utils import environment, message, process
-from utils.constants import ErrorCode
+from nvshim.compiler import __version__
+from nvshim.utils import environment, message, process
+from nvshim.utils.constants import ErrorCode
 
 
 AliasMapping = VersionMapping = Dict[str, str]

@@ -13,8 +13,6 @@ This will use existing [`.nvmrc`](https://github.com/nvm-sh/nvm#nvmrc) file, fal
 
 ## Installation
 
-> TODO: implement readme documentation spec
-
 ### Pip
 
 ```sh
@@ -23,13 +21,22 @@ pip install nvshim
 
 ### Build
 
-This requires having `git` and `make` configured for your terminal.
+This requires having `git` and `pip` or `make` configured for your terminal.
 
 #### Clone project repository
 
 ```sh
-git clone git@github.com:iamogbz/nvshim.git && cd nvmshim
+git clone git@github.com:iamogbz/nvshim.git
 ```
+
+#### Pip install python project
+
+```sh
+pip install nvshim/
+```
+
+<details>
+<summary>Or you can manually build and run the installer</summary>
 
 #### Install project dependencies
 
@@ -54,6 +61,8 @@ Or to configure multiple shell profiles simultaenously
 ```sh
 dist/installer ~/.nvshim ~/.bash_profile ~/.config/fish/config.fish
 ```
+
+</details>
 
 ## Configuration
 

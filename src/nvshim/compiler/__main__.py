@@ -1,7 +1,7 @@
 import os
 from typing import Union
 
-from utils.process import run
+from nvshim.utils.process import run
 
 
 FileContents = Union[bytes, str]
@@ -23,7 +23,7 @@ def _write_file(path: str, contents: FileContents, mode: str = "w"):
         f.write(contents)
 
 
-def _build_dist(name: str):
+def _build_dist(name: str, *, build_args: [str] = [], script_file_name: str = None):
     dist_path = "dist"
     run(
         "pyinstaller",
@@ -36,7 +36,8 @@ def _build_dist(name: str):
         dist_path,
         "--specpath",
         "artifacts",
-        _get_script_file_path(name),
+        _get_script_file_path(script_file_name or name),
+        *build_args,
     )
     return os.path.join(dist_path, name)
 
