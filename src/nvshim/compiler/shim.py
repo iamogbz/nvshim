@@ -1,13 +1,13 @@
 import os
 import sys
 
-from nvshim.core.__main__ import main
+import nvshim.core.__main__ as core
 
 
-def entry():
+def main():
     sys.argv.insert(1, os.path.basename(sys.argv[0]))
-    main()
+    core.main()
 
 
 if __name__ == "__main__":
-    entry()
+    main()

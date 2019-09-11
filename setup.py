@@ -78,9 +78,7 @@ setup(
         "Topic :: Software Development",
     ],
     description="Automagically use the correct version of node",
-    entry_points={
-        "console_scripts": [f"{s}=nvshim.compiler.shim:entry" for s in shims]
-    },
+    entry_points={"console_scripts": [f"{s}=nvshim.compiler.shim:main" for s in shims]},
     include_package_data=True,
     install_requires=get_requirements("requirements/prod.txt", []),
     keywords="node nvm node-shim shim shell nvm-shim",
