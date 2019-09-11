@@ -71,7 +71,7 @@ test:
 	$(PYTEST_EXEC) -s -k $(keyword)
 
 .PHONY: coverage
-coverage: src
+coverage:
 	@$(COVERAGE_EXEC) run --source=. -m pytest
 	@$(COVERAGE_EXEC) html
 
