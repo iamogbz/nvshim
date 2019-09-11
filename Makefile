@@ -91,7 +91,7 @@ sanity:
 	touch $(PROFILE)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
 	. $(PROFILE) && nvm install stable
-	./dist/installer $(NVSHIM_BIN) $(PROFILE)
+	./dist/installer $(NVSHIM_BIN) $(PROFILE) ~/.bashrc
 	echo 'lts/dubnium' > .nvmrc
 	$(NVSHIM_EXEC)node --version | grep -q 'v10.16.3' && echo 'success' || exit 1
 	$(NVSHIM_EXEC)npm --version | grep -q '6.9.0' && echo 'success' || exit 1
