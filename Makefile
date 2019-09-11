@@ -84,7 +84,7 @@ run:
 	$(PYTHON_EXEC) $(py) $(args)
 
 build: clean
-	@$(PYTHON_EXEC) ./src/compiler
+	@$(PYTHON_EXEC) src/nvshim/compiler
 	@$(PYTHON_EXEC) setup.py sdist bdist_wheel
 
 .PHONY: setup

@@ -6,8 +6,8 @@ import os
 from setuptools import setup
 from typing import Sequence
 
-from compiler import __version__
-from utils.constants import shims
+from nvshim.compiler import __version__
+from nvshim.utils.constants import shims
 
 
 def readme() -> str:
@@ -78,14 +78,16 @@ setup(
         "Topic :: Software Development",
     ],
     description="Automagically use the correct version of node",
-    entry_points={"console_scripts": [f"{s}=compiler.shim:entry" for s in shims]},
+    entry_points={
+        "console_scripts": [f"{s}=nvshim.compiler.shim:entry" for s in shims]
+    },
     include_package_data=True,
     install_requires=get_requirements("requirements/prod.txt", []),
     keywords="node nvm node-shim shim shell nvm-shim",
     long_description=readme(),
     license="GNU",
     name="nvshim",
-    packages=["compiler", "nvshim", "utils"],
+    packages=["nvshim.compiler", "nvshim.core", "nvshim.utils"],
     package_dir={"": "src"},
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",

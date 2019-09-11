@@ -6,8 +6,8 @@ import stat
 import sys
 from typing import Sequence
 
-from compiler import __version__
-from utils import constants, message
+from nvshim.compiler import __version__
+from nvshim.utils import constants, message
 
 
 def parse_args(args: Sequence[str]) -> argparse.Namespace:

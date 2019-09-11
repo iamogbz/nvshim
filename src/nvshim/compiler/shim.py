@@ -1,7 +1,7 @@
 import os
 import sys
 
-from nvshim.__main__ import main
+from nvshim.core.__main__ import main
 
 
 def entry():

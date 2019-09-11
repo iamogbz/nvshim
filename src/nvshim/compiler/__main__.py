@@ -1,7 +1,7 @@
 import os
 from typing import Union
 
-from utils.process import run
+from nvshim.utils.process import run
 
 
 FileContents = Union[bytes, str]
