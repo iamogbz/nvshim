@@ -79,7 +79,6 @@ setup(
     long_description=readme(),
     license="GNU",
     name="nvshim",
-    scripts=[f"dist/{filename}" for filename in ["node", "npm", "npx"]],
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",
     version=__version__,
