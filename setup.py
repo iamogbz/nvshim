@@ -73,6 +73,13 @@ setup(
         "Topic :: Software Development",
     ],
     description="Automagically use the correct version of node",
+    entry_points={
+        "console_scripts": [
+            "node=src.compiler.shim",
+            "npm=src.compiler.shim",
+            "npx=src.compiler.shim",
+        ]
+    },
     include_package_data=True,
     install_requires=get_requirements("requirements/prod.txt", []),
     keywords="node nvm node-shim shim shell nvm-shim",

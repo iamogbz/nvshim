@@ -90,8 +90,16 @@ build: src
 
 dist: build
 	dist/installer dist
-	@$(PYTHON_EXEC) setup.py sdist bdist_wheel
 	@touch dist
+
+.PHONY: setup
+setup: src
+	make clean
+	@$(PYTHON_EXEC) setup.py sdist bdist_wheel
+
+.PHONY: shim
+shim: setup
+	$(WITH_ENV) DISTUTILS_DEBUG=1 $(PIP_EXEC) install . -vvv
 
 .PHONY: sanity
 sanity:
