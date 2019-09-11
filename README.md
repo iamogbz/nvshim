@@ -85,5 +85,9 @@ Otherwise set to `0` or `false` or nothing.
 All forms of contribution welcome, please see [guide](./CONTRIBUTING.md).
 
 ```sh
+make install
+```
+
+```sh
 make tests
 ```
