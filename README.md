@@ -21,64 +21,17 @@ This will use existing [`.nvmrc`](https://github.com/nvm-sh/nvm#nvmrc) file, fal
 pip install nvshim
 ```
 
-### Script
-
-Use the distributed installer
-
-```sh
-curl -s https://github.com/iamogbz/nvmshim/releases/download/v0.0.1/installer.py | env NVSHIM_DIR=~/.nvshim PROFILE=~/.bashrc python
-```
-
-> Each installer is keyed to its release version
-
-<details>
-<summary>Details</summary>
-
-#### Manual
-
-All the shim binaries are identical, with the only difference being the name of the node binary to shim.
-
-##### Download distributable
-
-Get specific `shim` version from the [releases page](https://github.com/iamogbz/nvmshim/releases).
-
-##### Ensure downloaded file can be executed
-
-```sh
-chmod +x shim
-```
-
-##### Copy binary into your nvshim install path
-
-```sh
-mkdir -p ~/.nvshim
-```
-
-```sh
-cp shim ~/.nvshim/node
-cp shim ~/.nvshim/npm
-cp shim ~/.nvshim/npx
-```
-
-##### Add install folder to `PATH` in your shell config profile
-
-```sh
-export PATH="~/.nvshim:$PATH"
-```
-
-</details>
-
 ### Build
 
 This requires having `git` and `make` configured for your terminal.
 
-#### Clone and navigate into repo
+#### Clone project repository
 
 ```sh
 git clone git@github.com:iamogbz/nvshim.git && cd nvmshim
 ```
 
-#### Install dependencies
+#### Install project dependencies
 
 ```sh
 make install
@@ -90,14 +43,16 @@ make install
 make build
 ```
 
-#### Run installer
-
-With the same environment variables as the [install script](#script).
-
-##### Example
+#### Install shim and configure shell
 
 ```sh
-env NVSHIM_DIR=~/.nvshim PROFILE=~/.config/fish/config.fish dist/installer
+env NVSHIM_DIR=~/.nvshim PROFILE=~/.bash_profile dist/installer
+```
+
+Or to configure multiple shell profiles simultaenously
+
+```sh
+dist/installer ~/.nvshim ~/.bash_profile ~/.config/fish/config.fish
 ```
 
 ## Configuration

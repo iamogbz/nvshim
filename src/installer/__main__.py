@@ -19,11 +19,11 @@ def parse_args(args: Sequence[str]) -> argparse.Namespace:
         help="Path to location for node shims installation",
     )
     parser.add_argument(
-        "profile_path",
+        "profile_paths",
         type=str,
-        nargs="?",
+        nargs="*",
         metavar="PROFILE",
-        help="Path to profile to configure with exports",
+        help="Paths to profiles to configure with exports",
     )
 
     return parser.parse_args(args)
@@ -40,31 +40,39 @@ def install_shims(shim_bin: bytes, install_path: str):
             message.print_installed_shim(file_path)
 
 
-def configure_profile(configuration: str, profile_path: str):
-    profile_section = "## NVSHIM: DO NOT MODIFY"
-    initial_profile = ""
+def configure_profile(config: str, *paths: [str]):
+    config_border = "## NVSHIM: DO NOT MODIFY"
 
-    if os.path.exists(profile_path):
-        with open(profile_path, "r") as profile:
-            initial_profile = profile.read()
+    def _with_border(content: str) -> str:
+        return f"{config_border}{content}{config_border}"
 
-    wrapped_config = "\n".join([profile_section, configuration, profile_section])
-    if profile_section in initial_profile:
-        modified_profile = re.sub(
-            pattern=f"{profile_section}(.|\\s)*{profile_section}",
-            repl=wrapped_config,
-            string=initial_profile,
-        )
-    else:
-        modified_profile = "\n".join(filter(bool, [initial_profile, wrapped_config]))
+    for profile_path in paths:
+        profile_content = ""
+        if os.path.exists(profile_path):
+            with open(profile_path, "r") as profile:
+                profile_content = profile.read().strip()
 
-    with open(profile_path, "w+") as profile:
-        profile.write(modified_profile)
-        message.print_updated_profile(profile_path, configuration)
+        profile_config = _with_border(f"\n{config}\n")
+        if config_border in profile_content:
+            modified_profile = re.sub(
+                pattern=_with_border("(.|\\s)*"),
+                repl=profile_config,
+                string=profile_content,
+            )
+        else:
+            modified_profile = (
+                f"{profile_content}\n{profile_config}"
+                if profile_content
+                else f"{profile_config}\n"
+            )
+
+        with open(profile_path, "w+") as profile:
+            profile.write(modified_profile)
+            message.print_updated_profile(profile_path, config)
 
 
-def configure_sh(install_path: str, profile_path: str):
-    configure_profile(f'export PATH="{install_path}:$PATH"', profile_path)
+def configure_sh(install_path: str, *profile_paths: [str]):
+    configure_profile(f'export PATH="{install_path}:$PATH"', *profile_paths)
 
 
 def parse_path(path: str) -> str:
@@ -89,8 +97,8 @@ def main(shim_bin: bytes, version_number: str = __version__):
 
     install_path = parse_path(args.install_path)
     install_shims(shim_bin, install_path)
-    if args.profile_path:
-        configure_sh(install_path, parse_path(args.profile_path))
+    if args.profile_paths:
+        configure_sh(install_path, *map(parse_path, args.profile_paths))
 
     message.print_install_complete()
 
