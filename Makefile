@@ -9,6 +9,7 @@ PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
 COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
 BLACK_EXEC = $(VENV_BIN)black
 
+PYTHON_SETUP = $(PYTHON_EXEC) setup.py
 RELEASE_FLAGS = $(shell [ '$(GITHUB_REF)' = 'refs/heads/master' ] && echo '' || echo ' --noop')
 RELEASE_EXEC = $(VENV_BIN)semantic-release$(RELEASE_FLAGS)
 
@@ -85,22 +86,37 @@ run:
 
 build: clean
 	@$(PYTHON_EXEC) src/nvshim/compiler
-	@$(PYTHON_EXEC) setup.py sdist bdist_wheel
+	@$(PYTHON_SETUP) sdist bdist_wheel
 
 .PHONY: setup
 setup:
 	$(WITH_ENV) DISTUTILS_DEBUG=1 $(PIP_EXEC) install . -vvv
 
-.PHONY: sanity
-sanity:
+.PHONY: sanities
+sanities:
 	touch $(PROFILE)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
 	. $(PROFILE) && nvm install stable
+	make sanity.pip
+	make sanity.build
+
+.PHONY: sanity.check
+sanity.check:
+	$(exec) --version | grep -q '$(match)' && echo 'success' || exit 1
+
+sanity.pip:
+	$(PYTHON_SETUP) install
+	echo 'lts/carbon' > .nvmrc
+	make sanity.check exec=node version="v8.16.1"
+	make sanity.check exec=npm version="6.4.1"
+	make sanity.check exec=npx version="6.4.1"
+
+sanity.build:
 	./dist/installer $(NVSHIM_BIN) $(PROFILE) ~/.bashrc
 	echo 'lts/dubnium' > .nvmrc
-	$(NVSHIM_EXEC)node --version | grep -q 'v10.16.3' && echo 'success' || exit 1
-	$(NVSHIM_EXEC)npm --version | grep -q '6.9.0' && echo 'success' || exit 1
-	$(NVSHIM_EXEC)npx --version | grep -q '6.9.0' && echo 'success' || exit 1
+	make sanity.check exec=$(NVSHIM_EXEC)node version="v10.16.3"
+	make sanity.check exec=$(NVSHIM_EXEC)npm version="6.9.0"
+	make sanity.check exec=$(NVSHIM_EXEC)npx version="6.9.0"
 
 .PHONY: lint
 lint:
