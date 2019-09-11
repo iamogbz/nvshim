@@ -112,7 +112,7 @@ format:
 
 .PHONY: deploy
 deploy:
-	$(RELEASE_EXEC) publish
+	echo "$(RELEASE_EXEC) publish"
 
 ifndef VERBOSE
 .SILENT:
