@@ -130,6 +130,7 @@ format:
 
 .PHONY: deploy
 deploy:
+	$(PYTHON_EXEC) test_release.py
 	$(RELEASE_EXEC) publish
 
 ifndef VERBOSE
