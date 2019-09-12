@@ -130,8 +130,9 @@ format:
 
 .PHONY: deploy
 deploy:
+	git remote get-url origin
 	$(PYTHON_EXEC) test_release.py
-	$(RELEASE_EXEC) publish
+	# $(RELEASE_EXEC) publish
 
 ifndef VERBOSE
 .SILENT:
