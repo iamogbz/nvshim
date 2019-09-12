@@ -132,6 +132,7 @@ format:
 deploy:
 	git remote get-url origin
 	$(PYTHON_EXEC) test_release.py
+	env
 	# $(RELEASE_EXEC) publish
 
 ifndef VERBOSE
