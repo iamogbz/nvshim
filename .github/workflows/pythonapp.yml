@@ -26,20 +26,18 @@ jobs:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         make report
-    - name: Build distributables
-      run: |
-        make build
     - name: Run sanities
       env:
         NVSHIM_AUTO_INSTALL: true
         NVSHIM_VERBOSE: true
       run: |
         make sanities
-    - name: Run semantic release
+    - name: Build distributables
+      run: |
+        make setup
+    - name: Run release
       env:
-        DEBUG: "*"
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         make deploy
