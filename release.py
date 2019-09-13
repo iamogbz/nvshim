@@ -6,7 +6,7 @@ from datetime import datetime
 
 import semver
 
-from nvshim import compiler as version_pkg
+import nvshim as version_pkg
 from nvshim.utils import process
 
 

@@ -6,7 +6,7 @@ import os
 from setuptools import setup
 from typing import Sequence
 
-from nvshim.compiler import __version__
+from nvshim import __version__
 from nvshim.utils.constants import shims
 
 
@@ -86,7 +86,7 @@ setup(
     long_description_content_type="text/markdown",
     license="GNU",
     name="nvshim",
-    packages=["nvshim.compiler", "nvshim.core", "nvshim.utils"],
+    packages=["nvshim", "nvshim.compiler", "nvshim.core", "nvshim.utils"],
     package_dir={"": "src"},
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",

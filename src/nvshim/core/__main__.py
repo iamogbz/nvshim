@@ -8,7 +8,7 @@ from typing import Callable, Dict, List, Sequence, Set, Union
 
 import semver
 
-from nvshim.compiler import __version__
+from nvshim import __version__
 from nvshim.utils import environment, message, process
 from nvshim.utils.constants import ErrorCode
 
