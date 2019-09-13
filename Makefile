@@ -12,9 +12,7 @@ BLACK_EXEC = $(VENV_BIN)black
 PYTHON_SETUP = $(PYTHON_EXEC) setup.py
 
 PROFILE = $(HOME)/.profile
-NVM_DIR = $(HOME)/.nvm
 NVSHIM_BIN = $(HOME)/.nvshim/bin/
-NVSHIM_EXEC = env NVM_DIR=$(NVM_DIR) $(NVSHIM_BIN)
 
 .PHONY: upstream
 upstream:
@@ -82,41 +80,39 @@ report:
 run:
 	$(PYTHON_EXEC) $(py) $(args)
 
-build: clean
+.PHONY: compile
+compile: clean
 	@$(PYTHON_EXEC) src/nvshim/compiler
-	@$(PYTHON_SETUP) sdist bdist_wheel
-
-.PHONY: setup
-setup:
-	$(WITH_ENV) DISTUTILS_DEBUG=1 $(PIP_EXEC) install . -vvv
 
 .PHONY: sanities
 sanities:
 	touch $(PROFILE)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
 	. $(PROFILE) && nvm install stable
-	make sanity.pip
-	make sanity.build
+	make sanity.setup
+	make sanity.compile
 
 .PHONY: sanity.check
 sanity.check:
-	$(exec) --version | grep -q '$(match)' && echo 'success' || exit 1
+	env NVM_DIR=$(HOME)/.nvm $(exec) --version | grep -q '$(match)' && echo 'success' || exit 1
 
-.PHONY: sanity.pip
-sanity.pip:
+.PHONY: sanity.setup
+sanity.setup:
 	$(PYTHON_SETUP) install
 	echo 'lts/carbon' > .nvmrc
 	make sanity.check exec=node version="v8.16.1"
 	make sanity.check exec=npm version="6.4.1"
 	make sanity.check exec=npx version="6.4.1"
+	rm .nvmrc
 
-.PHONY: sanity.build
-sanity.build:
+.PHONY: sanity.compile
+sanity.compile: compile
 	./dist/installer $(NVSHIM_BIN) $(PROFILE) ~/.bashrc
 	echo 'lts/dubnium' > .nvmrc
-	make sanity.check exec=$(NVSHIM_EXEC)node version="v10.16.3"
-	make sanity.check exec=$(NVSHIM_EXEC)npm version="6.9.0"
-	make sanity.check exec=$(NVSHIM_EXEC)npx version="6.9.0"
+	make sanity.check exec=$(NVSHIM_BIN)node version="v10.16.3"
+	make sanity.check exec=$(NVSHIM_BIN)npm version="6.9.0"
+	make sanity.check exec=$(NVSHIM_BIN)npx version="6.9.0"
+	rm .nvmrc
 
 .PHONY: lint
 lint:
@@ -125,6 +121,14 @@ lint:
 .PHONY: format
 format:
 	$(BLACK_EXEC) .
+
+.PHONY: setup.debug
+setup.debug: clean
+	export DISTUTILS_DEBUG=1 && $(PYTHON_SETUP) install -vvv
+
+.PHONY: setup
+setup: clean
+	@$(PYTHON_SETUP) sdist bdist_wheel
 
 .PHONY: deploy
 deploy:
