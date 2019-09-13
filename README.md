@@ -6,6 +6,9 @@ Automagically use the correct version of node with [`nvm exec`](https://github.c
 
 ![Build Status](https://github.com/iamogbz/nvshim/workflows/Build%20Python%20App/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/iamogbz/nvshim/badge.svg?branch=HEAD)](https://coveralls.io/github/iamogbz/nvshim?branch=HEAD)
+![Pypi](https://img.shields.io/pypi/v/nvshim)
+![Stage](https://img.shields.io/pypi/status/nvshim)
+![Wheel](https://img.shields.io/pypi/wheel/nvshim)
 
 > **No more `nvm use`**
 
