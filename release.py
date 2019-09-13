@@ -6,10 +6,10 @@ from datetime import datetime
 
 import semver
 
+from nvshim import compiler as version_pkg
 from nvshim.utils import process
 
 
-version_file = os.path.join("src", "nvshim", "__init__.py")
 dist_path = "dist"
 
 
@@ -32,15 +32,15 @@ def _is_valid_release_version(version: str) -> bool:
 
 @contextmanager
 def _setup_version(version: str):
-    with open(version_file, "r") as f:
+    with open(version_pkg.__file__, "r") as f:
         file_content = f.read()
     try:
-        with open(version_file, "w") as f:
+        with open(version_pkg.__file__, "w") as f:
             print("Setting version to:", version)
             f.write(file_content.replace("0.0.0", version))
         yield
     finally:
-        with open(version_file, "w") as f:
+        with open(version_pkg.__file__, "w") as f:
             print("Restoring version")
             f.write(file_content)
 

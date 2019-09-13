@@ -6,7 +6,7 @@ import os
 from setuptools import setup
 from typing import Sequence
 
-from nvshim import __version__
+from nvshim.compiler import __version__
 from nvshim.utils.constants import shims
 
 

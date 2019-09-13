@@ -1,6 +1,6 @@
 # NVM Shim
 
-![LOGO](./assets/images/logo.svg)
+![LOGO](https://i.ibb.co/PZTm9Sr/logo.png)
 
 Automagically use the correct version of node with [`nvm exec`](https://github.com/nvm-sh/nvm#usage) functionality.
 
@@ -32,35 +32,6 @@ git clone git@github.com:iamogbz/nvshim.git
 ```sh
 pip install nvshim/
 ```
-
-<details>
-<summary>Or you can manually build and run the installer</summary>
-
-#### Install project dependencies
-
-```sh
-make install
-```
-
-#### Build distributable binaries
-
-```sh
-make build
-```
-
-#### Install shim and configure shell
-
-```sh
-env NVSHIM_DIR=~/.nvshim PROFILE=~/.bash_profile dist/installer
-```
-
-Or to configure multiple shell profiles simultaenously
-
-```sh
-dist/installer ~/.nvshim ~/.bash_profile ~/.config/fish/config.fish
-```
-
-</details>
 
 ## Configuration
 
