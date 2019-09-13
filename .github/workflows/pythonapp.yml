@@ -18,7 +18,7 @@ jobs:
     - name: Lint source files
       run: |
         make lint
-    - name: Run test files
+    - name: Run tests
       run: |
         make coverage
     - name: Report coverage
@@ -32,9 +32,6 @@ jobs:
         NVSHIM_VERBOSE: true
       run: |
         make sanities
-    - name: Build distributables
-      run: |
-        make setup
     - name: Run release
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}

@@ -126,10 +126,6 @@ format:
 setup.debug: clean
 	export DISTUTILS_DEBUG=1 && $(PYTHON_SETUP) install -vvv
 
-.PHONY: setup
-setup: clean
-	@$(PYTHON_SETUP) sdist bdist_wheel
-
 .PHONY: deploy
 deploy:
 	$(PYTHON_EXEC) release.py
