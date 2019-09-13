@@ -132,7 +132,7 @@ setup: clean
 
 .PHONY: deploy
 deploy:
-	"$(PYTHON_EXEC) release.py"
+	$(PYTHON_EXEC) release.py
 
 ifndef VERBOSE
 .SILENT:
