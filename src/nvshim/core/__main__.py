@@ -3,7 +3,7 @@ import functools
 import os
 import re
 import sys
-from typing import Callable, Dict, List, Sequence, Union
+from typing import Callable, Dict, List, Sequence, Set, Union
 
 import semver
 
@@ -16,6 +16,16 @@ AliasResolver = Callable[..., str]
 AliasOrResolver = Union[str, AliasResolver]
 AliasMapping = Dict[str, AliasOrResolver]
 VersionMapping = Dict[str, str]
+
+
+class HashableList(list):
+    def __hash__(self):
+        return hash(frozenset(self))
+
+
+class HashableSet(set):
+    def __hash__(self):
+        return hash(frozenset(self))
 
 
 class HashableDict(dict):
@@ -83,26 +93,25 @@ def parse_version(version: str) -> semver.VersionInfo:
 
 @functools.lru_cache(maxsize=None)
 def resolve_alias(
-    ar: AliasOrResolver, alias_mapping: AliasMapping
+    var: AliasOrResolver,
+    alias_mapping: AliasMapping,
+    seen: Set[str] = HashableSet(),
+    seen_order: List[str] = HashableList(),
 ) -> (semver.VersionInfo, str, [str]):
     """
     Resolve an alias to a semantic version going through multiple mappings
-    
-    :param name: name of the version alias to resolve
-    :type alias_mapping: mapping of alias to version
+
+    :param var: version alias or resolver
+    :type alias_mapping: mapping of alias to version, alias or resolver
     :return: (semantic version info, alias name, list of aliases traversed)
     """
-    seen_in_order = []
-    seen = set()
-    while True:
-        name = ar() if callable(ar) else ar
-        if name not in alias_mapping or name in seen:
-            break
-        seen_in_order.append(name)
-        seen.add(name)
-        ar = alias_mapping.get(name)
+    alias = var() if callable(var) else var
+    if alias in alias_mapping and alias not in seen:
+        seen_order.append(alias)
+        seen.add(alias)
+        return resolve_alias(alias_mapping.get(alias), alias_mapping, seen, seen_order)
 
-    return parse_version(name), name, seen_in_order
+    return parse_version(alias), alias, seen_order
 
 
 @functools.lru_cache(maxsize=None)
