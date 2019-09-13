@@ -13,9 +13,8 @@ def _get_publish_command(*, dry_run: bool = True):
 
 def main():
     print(os.environ)
-    completed_process = subprocess.run(
-        _get_publish_command(dry_run=True),
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
+    completed_process = subprocess.run(_get_publish_command(dry_run=True), check=True)
+
+
+if __name__ == "__main__":
+    main()
