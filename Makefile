@@ -132,6 +132,8 @@ format:
 .PHONY: deploy
 deploy:
 	git remote set-url origin $(GIT_REMOTE_URL:%.git=%).git
+	git config --global user.email $(GIT_USER_EMAIL)
+	git config --global user.name $(GIT_USER_NAME)
 	$(RELEASE_EXEC) publish
 
 ifndef VERBOSE
