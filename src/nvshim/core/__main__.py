@@ -3,7 +3,7 @@ import functools
 import os
 import re
 import sys
-from typing import Dict, List, Sequence
+from typing import Callable, Dict, List, Sequence, Set, Union
 
 import semver
 
@@ -12,7 +12,20 @@ from nvshim.utils import environment, message, process
 from nvshim.utils.constants import ErrorCode
 
 
-AliasMapping = VersionMapping = Dict[str, str]
+AliasResolver = Callable[..., str]
+AliasOrResolver = Union[str, AliasResolver]
+AliasMapping = Dict[str, AliasOrResolver]
+VersionMapping = Dict[str, str]
+
+
+class HashableList(list):
+    def __hash__(self):
+        return hash(frozenset(self))
+
+
+class HashableSet(set):
+    def __hash__(self):
+        return hash(frozenset(self))
 
 
 class HashableDict(dict):
@@ -58,7 +71,7 @@ def get_nvm_aliases_dir(nvm_dir: str) -> str:
 
 def get_nvm_aliases(nvm_dir: str) -> AliasMapping:
     aliases_to_version = HashableDict(
-        default="stable", node="stable", stable=get_nvm_stable_version(nvm_dir)
+        default="stable", node="stable", stable=lambda: get_nvm_stable_version(nvm_dir)
     )
     nvm_aliases_dir = get_nvm_aliases_dir(nvm_dir)
     for file_path in get_files(nvm_aliases_dir):
@@ -80,23 +93,25 @@ def parse_version(version: str) -> semver.VersionInfo:
 
 @functools.lru_cache(maxsize=None)
 def resolve_alias(
-    name: str, alias_mapping: AliasMapping
+    var: AliasOrResolver,
+    alias_mapping: AliasMapping,
+    seen: Set[str] = HashableSet(),
+    seen_order: List[str] = HashableList(),
 ) -> (semver.VersionInfo, str, [str]):
     """
     Resolve an alias to a semantic version going through multiple mappings
-    
-    :param name: name of the version alias to resolve
-    :type alias_mapping: mapping of alias to version
+
+    :param var: version alias or resolver
+    :type alias_mapping: mapping of alias to version, alias or resolver
     :return: (semantic version info, alias name, list of aliases traversed)
     """
-    seen_in_order = []
-    seen = set()
-    while name in alias_mapping and name not in seen:
-        name = alias_mapping.get(name)
-        seen_in_order.append(name)
-        seen.add(name)
+    alias = var() if callable(var) else var
+    if alias in alias_mapping and alias not in seen:
+        seen_order.append(alias)
+        seen.add(alias)
+        return resolve_alias(alias_mapping.get(alias), alias_mapping, seen, seen_order)
 
-    return parse_version(name), name, seen_in_order
+    return parse_version(alias), alias, seen_order
 
 
 @functools.lru_cache(maxsize=None)
@@ -106,7 +121,9 @@ def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> AliasMapping:
     """
     resolved_aliases = {}
     for alias, version in nvm_aliases.items():
-        version_info = parse_version(version) or resolve_alias(version, nvm_aliases)[0]
+        version_info = (
+            type(version) is str and parse_version(version)
+        ) or resolve_alias(version, nvm_aliases)[0]
 
         if version_info:
             resolved_aliases[alias] = str(version_info)
@@ -187,6 +204,8 @@ def get_bin_path(
     node_versions_dir: str,
     nvm_sh_path: str,
 ):
+    if version not in node_versions and nvm_aliases.get(version) not in node_versions:
+        nvm_aliases = resolve_nvm_aliases(nvm_aliases)
     version_mapping = merge_nvm_aliases_with_node_versions(nvm_aliases, node_versions)
     try:
         node_path = version_mapping[version]
@@ -249,7 +268,7 @@ def main(version_number: str = __version__):
     bin_path = get_bin_path(
         version=version,
         is_version_parsed=parsed,
-        nvm_aliases=resolve_nvm_aliases(get_nvm_aliases(nvm_dir)),
+        nvm_aliases=get_nvm_aliases(nvm_dir),
         node_versions=get_node_versions(get_node_versions_dir(nvm_dir)),
         node_versions_dir=get_node_versions_dir(nvm_dir),
         bin_file=parsed_args.bin_file,
