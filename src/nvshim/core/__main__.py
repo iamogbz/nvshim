@@ -57,10 +57,7 @@ def _run_nvm_cmd(
 @functools.lru_cache(maxsize=None)
 def get_nvm_stable_version(nvm_dir) -> str:
     output = _run_nvm_cmd(
-        get_nvmsh_path(nvm_dir),
-        "alias stable",
-        stdout=subprocess.PIPE,
-        stdin=subprocess.PIPE,
+        get_nvmsh_path(nvm_dir), "alias stable", stdout=subprocess.PIPE
     ).stdout
     result = re.sub(r"\x1B[@-_][0-?]*[ -/]*[@-~]", "", str(output).strip())
     try:

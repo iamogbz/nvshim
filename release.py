@@ -3,8 +3,6 @@ import subprocess
 
 import semver
 
-from nvshim.utils import process
-
 
 def _get_publish_command(*, dry_run: bool = True):
     cmd = ["twine", "upload"]
@@ -15,4 +13,9 @@ def _get_publish_command(*, dry_run: bool = True):
 
 def main():
     print(os.environ)
-    process.run(*_get_publish_command(dry_run=True))
+    completed_process = subprocess.run(
+        _get_publish_command(dry_run=True),
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
