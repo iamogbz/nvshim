@@ -132,8 +132,7 @@ format:
 .PHONY: deploy
 deploy:
 	git remote set-url origin $(GIT_REMOTE_URL:%.git=%).git
-	$(PYTHON_EXEC) test_release.py
-	# $(RELEASE_EXEC) publish
+	$(RELEASE_EXEC) publish
 
 ifndef VERBOSE
 .SILENT:
