@@ -9,6 +9,7 @@ def _get_publish_command(*, dry_run: bool = True):
     if dry_run:
         cmd.extend(["--repository-url", "https://test.pypi.org/legacy/"])
     cmd.append("dist/*")
+    return cmd
 
 
 def main():
