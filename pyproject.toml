@@ -16,10 +16,3 @@ exclude = '''
   | dist
 )
 '''
-
-[tool.semantic_release]
-branch = 'master'
-version_source = 'tag'
-version_variable = 'src/nvshim/compiler/__init__.py:__version__'
-commit_version_number = false
-upload_to_pypi = true
