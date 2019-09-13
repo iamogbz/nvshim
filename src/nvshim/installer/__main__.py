@@ -6,7 +6,7 @@ import stat
 import sys
 from typing import Sequence
 
-from nvshim.compiler import __version__
+from nvshim import __version__
 from nvshim.utils import constants, message
 
 
