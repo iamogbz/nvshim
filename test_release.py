@@ -22,7 +22,7 @@ def get_repository_owner_and_name() -> Tuple[str, str]:
     url = repo.remote("origin").url
     parts = re.search(r"[:/]([^\.:]+)/([^/]+).git$", url)
     if not parts:
-        print("No parts", url, parts, base64.b64encode(url))
+        print("No parts", url, parts, base64.b64encode(url.encode("utf-8")))
         return
     print("get_repository_owner_and_name", parts)
     return parts.group(1), parts.group(2)
