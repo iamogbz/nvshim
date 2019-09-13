@@ -83,6 +83,7 @@ setup(
     install_requires=get_requirements("requirements/prod.txt", []),
     keywords="node nvm node-shim shim shell nvm-shim",
     long_description=readme(),
+    long_description_content_type="text/markdown",
     license="GNU",
     name="nvshim",
     packages=["nvshim.compiler", "nvshim.core", "nvshim.utils"],
