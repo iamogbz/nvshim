@@ -10,6 +10,7 @@ from nvshim.utils import process
 
 
 version_file = os.path.join("src", "nvshim", "__init__.py")
+dist_path = "dist/*"
 
 
 def _get_ref_name() -> str:
@@ -44,35 +45,45 @@ def _setup_version(version: str):
             f.write(file_content)
 
 
+def _get_build_command():
+    return ["python", "setup.py", "sdist", "bdist_wheel"]
+
+
 def _get_publish_command(*, dry_run: bool = True):
     cmd = ["twine", "upload"]
     if dry_run:
         cmd.extend(["--repository-url", "https://test.pypi.org/legacy/"])
-    cmd.append("dist/*")
+    cmd.append(dist_path)
     return cmd
 
 
-def main():
-    version = _get_ref_name()
-    if not version:
-        print("No ref found")
-        return
+def _publish(*, version: str, dry_run: bool = True):
+    print("Cleaning up")
+    process.run("rm", "-rf", dist_path)
 
-    timestamp = datetime.now()
-    test_version = f"{version}-{timestamp}"
-    with _setup_version(test_version):
-        print("Publishing to sandbox: ", test_version)
-        process.run(*_get_publish_command(dry_run=True))
-
-    if not _is_valid_release_version(version):
-        print("Skipping publishing to pypi")
-        return
+    timestamp = datetime.timestamp(datetime.now())
+    if dry_run:
+        version = f"{version}-{timestamp}"
 
     with _setup_version(version):
-        print("Publishing to pypi:", version)
-        process.run(*_get_publish_command(dry_run=False))
+        print("Building version:", version)
+        process.run(*_get_build_command())
+        print("Publishing to:", "test.pypi.org" if dry_run else "pypi.org")
+        process.run(*_get_publish_command(dry_run=dry_run))
 
-    print("Finished publishing release version")
+    print("Publishing completed.")
+
+
+def main():
+    ref = _get_ref_name()
+    if ref:
+        _publish(version=ref, dry_run=True)
+    else:
+        return print("No reference version")
+    if _is_valid_release_version(ref):
+        _publish(version=ref, dry_run=False)
+    else:
+        return print("No release version")
 
 
 if __name__ == "__main__":
