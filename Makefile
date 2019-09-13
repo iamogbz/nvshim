@@ -9,10 +9,9 @@ PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
 COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
 BLACK_EXEC = $(VENV_BIN)black
 
-PYTHON_SETUP = $(PYTHON_EXEC) setup.py
+PYTHON_SETUP = $(PYTHON_EXEC) setup.py install
 
 PROFILE = $(HOME)/.profile
-NVSHIM_BIN = $(HOME)/.nvshim/bin/
 
 .PHONY: upstream
 upstream:
@@ -37,8 +36,12 @@ help:
 	@echo "make test keyword='Parse'         - run only test match keyword"
 	@echo "make tests                        - run all tests"
 	@echo "make coverage                     - run all tests and collect coverage"
-	@echo "make build                        - build executable from src"
+	@echo "make lint                         - run linter and format checker"
+	@echo "make format                       - fix formatting and linting errors"
+	@echo "make clean                        - clean generate artifacts"
 	@echo "make setup                        - run pip setup to install shim for development"
+	@echo "make setup.debug                  - run setup with verbose debugging"
+	@echo "make setup.sanity                 - run setup and verify functionality"
 	@echo "make deploy                       - run semantic release on built distributables"
 
 .PHONY: venv
@@ -80,39 +83,33 @@ report:
 run:
 	$(PYTHON_EXEC) $(py) $(args)
 
-.PHONY: compile
-compile: clean
-	@$(PYTHON_EXEC) src/nvshim/compiler
-
 .PHONY: sanities
 sanities:
 	touch $(PROFILE)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
 	. $(PROFILE) && nvm install stable
-	make sanity.setup
-	make sanity.compile
+	make setup.sanity
 
 .PHONY: sanity.check
 sanity.check:
 	env NVM_DIR=$(HOME)/.nvm $(exec) --version | grep -q '$(match)' && echo 'success' || exit 1
 
-.PHONY: sanity.setup
-sanity.setup:
-	$(PYTHON_SETUP) install
+.PHONY: setup
+setup:
+	$(PYTHON_SETUP)
+
+.PHONY: setup.sanity
+setup.sanity:
+	make setup
 	echo 'lts/carbon' > .nvmrc
-	make sanity.check exec=node version="v8.16.1"
-	make sanity.check exec=npm version="6.4.1"
-	make sanity.check exec=npx version="6.4.1"
+	make sanity.check exec=$(VENV_BIN)node version="v8.16.1"
+	make sanity.check exec=$(VENV_BIN)npm version="6.4.1"
+	make sanity.check exec=$(VENV_BIN)npx version="6.4.1"
 	rm .nvmrc
 
-.PHONY: sanity.compile
-sanity.compile: compile
-	./dist/installer $(NVSHIM_BIN) $(PROFILE) ~/.bashrc
-	echo 'lts/dubnium' > .nvmrc
-	make sanity.check exec=$(NVSHIM_BIN)node version="v10.16.3"
-	make sanity.check exec=$(NVSHIM_BIN)npm version="6.9.0"
-	make sanity.check exec=$(NVSHIM_BIN)npx version="6.9.0"
-	rm .nvmrc
+.PHONY: setup.debug
+setup.debug: clean
+	export DISTUTILS_DEBUG=1 && $(PYTHON_SETUP) -vvv
 
 .PHONY: lint
 lint:
@@ -121,10 +118,6 @@ lint:
 .PHONY: format
 format:
 	$(BLACK_EXEC) .
-
-.PHONY: setup.debug
-setup.debug: clean
-	export DISTUTILS_DEBUG=1 && $(PYTHON_SETUP) install -vvv
 
 .PHONY: deploy
 deploy:

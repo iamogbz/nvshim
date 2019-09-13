@@ -52,35 +52,6 @@ git clone git@github.com:iamogbz/nvshim.git
 pip install nvshim/
 ```
 
-<details>
-<summary>Or you can manually build and run the installer</summary>
-
-#### Install project dependencies
-
-```sh
-make install
-```
-
-#### Build distributable binaries
-
-```sh
-make build
-```
-
-#### Install shim and configure shell
-
-```sh
-env NVSHIM_DIR=~/.nvshim PROFILE=~/.bash_profile dist/installer
-```
-
-Or to configure multiple shell profiles simultaenously
-
-```sh
-dist/installer ~/.nvshim ~/.bash_profile ~/.config/fish/config.fish
-```
-
-</details>
-
 ## Configuration
 
 Reads all configuration from the environment.
