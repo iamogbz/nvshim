@@ -10,7 +10,7 @@ from nvshim.utils import process
 
 
 version_file = os.path.join("src", "nvshim", "__init__.py")
-dist_path = "dist/*"
+dist_path = "dist"
 
 
 def _get_ref_name() -> str:
@@ -53,7 +53,7 @@ def _get_publish_command(*, dry_run: bool = True):
     cmd = ["twine", "upload"]
     if dry_run:
         cmd.extend(["--repository-url", "https://test.pypi.org/legacy/"])
-    cmd.append(dist_path)
+    cmd.append(os.path.join(dist_path, "*"))
     return cmd
 
 
@@ -61,9 +61,10 @@ def _publish(*, version: str, dry_run: bool = True):
     print("Cleaning up")
     process.run("rm", "-rf", dist_path)
 
-    timestamp = datetime.timestamp(datetime.now())
     if dry_run:
-        version = f"{version}-{timestamp}"
+        now = datetime.now()
+        seconds = now.hour * now.minute * now.second
+        version = f"{now.year}.{now.month}.{now.day}.{seconds}"
 
     with _setup_version(version):
         print("Building version:", version)
