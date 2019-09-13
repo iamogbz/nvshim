@@ -1,3 +1,4 @@
+GIT_REMOTE_URL = $(shell git remote get-url origin)
 $(shell test -s ".env" || cp ".env.example" ".env")
 ENVARS := $(shell cat ".env" | xargs)
 WITH_ENV = env $(ENVARS)
@@ -130,9 +131,8 @@ format:
 
 .PHONY: deploy
 deploy:
-	git remote get-url origin
+	git remote set-url origin $(GIT_REMOTE_URL:%.git=%).git
 	$(PYTHON_EXEC) test_release.py
-	env
 	# $(RELEASE_EXEC) publish
 
 ifndef VERBOSE
