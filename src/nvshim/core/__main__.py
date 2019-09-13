@@ -74,12 +74,8 @@ def get_nvm_aliases(nvm_dir: str) -> AliasMapping:
 
 def parse_version(version: str) -> semver.VersionInfo:
     try:
-        return (
-            semver.parse_version_info(
-                version[1:] if version.startswith("v") else version
-            )
-            if type(version) is str
-            else None
+        return semver.parse_version_info(
+            version[1:] if version.startswith("v") else version
         )
     except ValueError:
         pass
@@ -87,7 +83,7 @@ def parse_version(version: str) -> semver.VersionInfo:
 
 @functools.lru_cache(maxsize=None)
 def resolve_alias(
-    maybe_name: AliasOrResolver, alias_mapping: AliasMapping
+    ar: AliasOrResolver, alias_mapping: AliasMapping
 ) -> (semver.VersionInfo, str, [str]):
     """
     Resolve an alias to a semantic version going through multiple mappings
@@ -98,12 +94,13 @@ def resolve_alias(
     """
     seen_in_order = []
     seen = set()
-    name = maybe_name() if callable(maybe_name) else maybe_name
-    while name in alias_mapping and name not in seen:
-        maybe_name = alias_mapping.get(name)
-        name = maybe_name() if callable(maybe_name) else maybe_name
+    while True:
+        name = ar() if callable(ar) else ar
+        if name not in alias_mapping or name in seen:
+            break
         seen_in_order.append(name)
         seen.add(name)
+        ar = alias_mapping.get(name)
 
     return parse_version(name), name, seen_in_order
 
@@ -115,7 +112,9 @@ def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> AliasMapping:
     """
     resolved_aliases = {}
     for alias, version in nvm_aliases.items():
-        version_info = parse_version(version) or resolve_alias(version, nvm_aliases)[0]
+        version_info = (
+            type(version) is str and parse_version(version)
+        ) or resolve_alias(version, nvm_aliases)[0]
 
         if version_info:
             resolved_aliases[alias] = str(version_info)
