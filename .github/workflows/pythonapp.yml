@@ -35,13 +35,9 @@ jobs:
         NVSHIM_VERBOSE: true
       run: |
         make sanities
-    - name: Run semantic release
+    - name: Run release
       env:
-        DEBUG: "*"
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
-        GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
-        PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         make deploy

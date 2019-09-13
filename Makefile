@@ -1,4 +1,3 @@
-GIT_REMOTE_URL = $(shell git remote get-url origin)
 $(shell test -s ".env" || cp ".env.example" ".env")
 ENVARS := $(shell cat ".env" | xargs)
 WITH_ENV = env $(ENVARS)
@@ -11,8 +10,6 @@ COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
 BLACK_EXEC = $(VENV_BIN)black
 
 PYTHON_SETUP = $(PYTHON_EXEC) setup.py
-RELEASE_FLAGS = $(shell [ '$(GITHUB_REF)' = 'refs/heads/master' ] && echo '' || echo ' --noop')
-RELEASE_EXEC = $(VENV_BIN)semantic-release$(RELEASE_FLAGS)
 
 PROFILE = $(HOME)/.profile
 NVM_DIR = $(HOME)/.nvm
@@ -131,10 +128,7 @@ format:
 
 .PHONY: deploy
 deploy:
-	git remote set-url origin $(GIT_REMOTE_URL:%.git=%).git
-	git config --global user.email $(GIT_USER_EMAIL)
-	git config --global user.name $(GIT_USER_NAME)
-	$(RELEASE_EXEC) publish
+	$(PYTHON_EXEC) release.py
 
 ifndef VERBOSE
 .SILENT:
