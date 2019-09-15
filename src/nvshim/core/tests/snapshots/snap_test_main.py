@@ -16,3 +16,12 @@ snapshots["TestParseArgs.test_accepts_bin_file_arg 1"] = (
     GenericRepr("Namespace(bin_args=[], bin_file='node')"),
     [],
 )
+
+snapshots[
+    "TestMain.test_fails_when_nvm_dir_not_available[true] 1"
+] = """Executing shim version 0.0.0
+Environment variable 'NVM_DIR' missing"""
+
+snapshots[
+    "TestMain.test_fails_when_nvm_dir_not_available[false] 1"
+] = "Environment variable 'NVM_DIR' missing"

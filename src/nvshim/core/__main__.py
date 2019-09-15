@@ -59,9 +59,8 @@ def get_nvm_stable_version(nvm_dir) -> str:
     output = _run_nvm_cmd(
         get_nvmsh_path(nvm_dir), "alias stable", stdout=subprocess.PIPE
     ).stdout
-    result = re.sub(r"\x1B[@-_][0-?]*[ -/]*[@-~]", "", str(output).strip())
     try:
-        return re.findall(r"> v([\w\.]+)", result)[0]
+        return re.findall(r"> v([\w\.]+)", process.clean_output(output))[0]
     except (IndexError, KeyError):
         message.print_unable_to_get_stable_version()
 

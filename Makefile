@@ -68,7 +68,7 @@ tests:
 
 .PHONY: test
 test:
-	$(PYTEST_EXEC) -s -k $(keyword)
+	$(PYTEST_EXEC) -s -k $(k) $(keyword)
 
 .PHONY: coverage
 coverage:
