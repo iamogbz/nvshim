@@ -62,7 +62,7 @@ def get_nvm_stable_version(nvm_dir) -> str:
     result = re.sub(r"\x1B[@-_][0-?]*[ -/]*[@-~]", "", str(output).strip())
     try:
         return re.findall(r"> v([\w\.]+)", result)[0]
-    except KeyError:
+    except (IndexError, KeyError):
         message.print_unable_to_get_stable_version()
 
 
