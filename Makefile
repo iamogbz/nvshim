@@ -72,7 +72,7 @@ test:
 
 .PHONY: coverage
 coverage:
-	@$(COVERAGE_EXEC) run --source=. -m pytest
+	@$(COVERAGE_EXEC) run --source=src -m pytest
 	@$(COVERAGE_EXEC) html
 
 .PHONY: report
