@@ -57,6 +57,15 @@ def test_workspace():
 
 
 @pytest.fixture
+def test_node_version_dir():
+    nvm_dir = os.environ.get("NVM_DIR")
+    if nvm_dir:
+        version_path = os.path.join(nvm_dir, "versions", "node", "v8.16.1")
+        shutil.rmtree(version_path, ignore_errors=True)
+        return version_path
+
+
+@pytest.fixture
 def test_workspace_with_nvmrc(test_workspace: str):
     _make_fs(test_workspace, __TEST_DIR_STRUCTURE__)
     yield test_workspace

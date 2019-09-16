@@ -42,7 +42,13 @@ class TestMain:
         assert not captured.err
 
     def test_fails_when_version_not_installed(
-        self, mocker, capsys, snapshot, test_args, test_nested_workspace_with_nvmrc
+        self,
+        mocker,
+        capsys,
+        snapshot,
+        test_args,
+        test_nested_workspace_with_nvmrc,
+        test_node_version_dir,
     ):
         mocker.patch(
             "nvshim.core.__main__.os.getcwd",
@@ -63,7 +69,13 @@ class TestMain:
         assert not captured.err
 
     def test_runs_correct_version_of_node(
-        self, mocker, capsys, snapshot, test_args, test_nested_workspace_with_nvmrc
+        self,
+        mocker,
+        capsys,
+        snapshot,
+        test_args,
+        test_nested_workspace_with_nvmrc,
+        test_node_version_dir,
     ):
         mocker.patch(
             "nvshim.core.__main__.os.getcwd",
@@ -80,14 +92,10 @@ class TestMain:
         }
         with process_env(mock_env):
             main()
-            bin_dir = get_node_version_bin_dir(
-                get_node_versions_dir(mock_env["NVM_DIR"]), "8.16.1"
-            )
 
         captured = capsys.readouterr()
         snapshot.assert_match(captured.out, name="sysout")
         snapshot.assert_match(captured.err, name="syserr")
         mocked_process_run.assert_called_with(
-            (f"{bin_dir}/{test_args[1]}", *test_args[2:]), check=True
+            (f"{test_node_version_dir}/bin/{test_args[1]}", *test_args[2:]), check=True
         )
-        shutil.rmtree(bin_dir, ignore_errors=True)
