@@ -65,7 +65,7 @@ setup(
     author="Emmanuel Ogbizi-Ugbe",
     author_email="iamogbz+pypi@gmail.com",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Intended Audience :: End Users/Desktop",
