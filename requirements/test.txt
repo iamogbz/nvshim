@@ -1,2 +1,3 @@
 pytest==4.4.1
 snapshottest==0.5.1
+pytest-mock==1.10.0
