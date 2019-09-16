@@ -50,11 +50,12 @@ def get_requirements(filepath: str, visited: [str]) -> [str]:
         req_package_delim = "=="
         requirements_dir = os.path.dirname(filepath)
         for line in lines(filepath):
+            if line.startswith("#"):
+                continue
             if line.startswith(req_file_delim):
                 nested_req_file = line.split(req_file_delim)[1].strip()
                 nested_req_filepath = os.path.join(requirements_dir, nested_req_file)
                 requirements.union(get_requirements(nested_req_filepath, visited))
-
             elif req_package_delim in line:
                 requirements.add(line.split(req_package_delim)[0])
 
