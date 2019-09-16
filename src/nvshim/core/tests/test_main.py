@@ -15,6 +15,9 @@ from nvshim.core.__main__ import (
 )
 
 
+__NVM_DIR__ = os.path.join(os.path.expanduser("~"), ".nvm")
+
+
 class TestParseArgs:
     def test_raises_missing_bin_file(self):
         with pytest.raises(SystemExit):
@@ -56,6 +59,7 @@ class TestMain:
             return_value=test_nested_workspace_with_nvmrc,
         )
         mock_env = {
+            EnvironmentVariable.NVM_DIR.value: __NVM_DIR__,
             **os.environ,
             EnvironmentVariable.VERBOSE.value: "true",
             EnvironmentVariable.AUTO_INSTALL.value: "false",
@@ -86,6 +90,7 @@ class TestMain:
             "nvshim.utils.process.subprocess.run", wraps=subprocess.run
         )
         mock_env = {
+            EnvironmentVariable.NVM_DIR.value: __NVM_DIR__,
             **os.environ,
             EnvironmentVariable.VERBOSE.value: "true",
             EnvironmentVariable.AUTO_INSTALL.value: "true",
