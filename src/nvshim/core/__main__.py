@@ -59,10 +59,9 @@ def get_nvm_stable_version(nvm_dir) -> str:
     output = _run_nvm_cmd(
         get_nvmsh_path(nvm_dir), "alias stable", stdout=subprocess.PIPE
     ).stdout
-    result = re.sub(r"\x1B[@-_][0-?]*[ -/]*[@-~]", "", str(output).strip())
     try:
-        return re.findall(r"> v([\w\.]+)", result)[0]
-    except KeyError:
+        return re.findall(r"> v([\w\.]+)", process.clean_output(output))[0]
+    except (IndexError, KeyError):
         message.print_unable_to_get_stable_version()
 
 
@@ -159,7 +158,7 @@ def merge_nvm_aliases_with_node_versions(
     return dict(alias_versions, **node_versions)
 
 
-def get_nvmrc_path(exec_dir: str = os.getcwd()) -> str:
+def get_nvmrc_path(exec_dir: str) -> str:
     root_dir = os.path.abspath(os.sep)
     current_dir = exec_dir
     config_file = ".nvmrc"
@@ -258,7 +257,7 @@ def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
 def main(version_number: str = __version__):
     message.print_running_version(version_number)
     parsed_args, unknown_args = parse_args(sys.argv[1:])
-    nvmrc_path = get_nvmrc_path()
+    nvmrc_path = get_nvmrc_path(os.getcwd())
     version, parsed = get_nvmrc(nvmrc_path)
     try:
         nvm_dir = environment.get_nvm_dir()

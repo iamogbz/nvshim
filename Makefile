@@ -4,7 +4,7 @@ WITH_ENV = env $(ENVARS)
 
 VENV_BIN = venv/bin/
 PIP_EXEC = $(VENV_BIN)pip
-PYTEST_EXEC = $(WITH_ENV) $(VENV_BIN)pytest
+PYTEST_EXEC = $(WITH_ENV) $(VENV_BIN)pytest -v
 PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
 COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
 BLACK_EXEC = $(VENV_BIN)black
@@ -68,11 +68,11 @@ tests:
 
 .PHONY: test
 test:
-	$(PYTEST_EXEC) -s -k $(keyword)
+	$(PYTEST_EXEC) -s -k $(k) $(keyword)
 
 .PHONY: coverage
 coverage:
-	@$(COVERAGE_EXEC) run --source=. -m pytest
+	@$(COVERAGE_EXEC) run --source=src -m pytest
 	@$(COVERAGE_EXEC) html
 
 .PHONY: report

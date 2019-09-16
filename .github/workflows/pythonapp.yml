@@ -18,6 +18,12 @@ jobs:
     - name: Lint source files
       run: |
         make lint
+    - name: Run sanities
+      env:
+        NVSHIM_AUTO_INSTALL: true
+        NVSHIM_VERBOSE: true
+      run: |
+        make sanities
     - name: Run tests
       run: |
         make coverage
@@ -26,12 +32,6 @@ jobs:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         make report
-    - name: Run sanities
-      env:
-        NVSHIM_AUTO_INSTALL: true
-        NVSHIM_VERBOSE: true
-      run: |
-        make sanities
     - name: Run release
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}

@@ -74,28 +74,9 @@ def print_version_not_installed(version: str):
     )
 
 
-def print_installed_shim(shim_path: str):
-    _print(f"Installed shim: {shim_path}", level=MessageLevel.QUIET)
-
-
-def print_updated_profile(profile_path: str, configuration: str):
-    _print(
-        f"Successfully updated profile: {profile_path}\n{configuration}",
-        level=MessageLevel.QUIET,
-    )
-
-
-def print_install_complete():
-    _print(f"Installation completed successfully")
-
-
-def print_installing_version(version_number: str):
-    _print(f"Installing shim version {version_number}")
-
-
 def print_running_version(version_number: str):
     _print(f"Executing shim version {version_number}", level=MessageLevel.QUIET)
 
 
 def print_unable_to_get_stable_version():
-    _print_error("Unable to retrieve stable version from nvm", level=MessageLevel.LOUD)
+    _print_error("Unable to retrieve stable version from nvm")

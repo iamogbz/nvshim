@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import sys
 from typing import Dict
@@ -21,3 +22,8 @@ def run(*args, **kwargs) -> subprocess.CompletedProcess:
             return subprocess.run(args, **kwargs, check=True)
     except subprocess.CalledProcessError as error:
         sys.exit(error.returncode)
+
+
+def clean_output(output: str) -> str:
+    """Removes ansi color codes from string"""
+    return re.sub(r"\x1B[@-_][0-?]*[ -/]*[@-~]", "", str(output).strip())
