@@ -9,6 +9,7 @@ import pytest
 
 __TEST_DIR__ = os.path.join(os.environ["PWD"], "tmp")
 __TEST_DIR_STRUCTURE__ = {".nvmrc": "lts/carbon"}
+__NVM_DIR__ = os.path.join(os.path.expanduser("~"), ".nvm")
 
 
 @pytest.fixture
@@ -58,11 +59,10 @@ def test_workspace():
 
 @pytest.fixture
 def test_node_version_dir():
-    nvm_dir = os.environ.get("NVM_DIR")
-    if nvm_dir:
-        version_path = os.path.join(nvm_dir, "versions", "node", "v8.16.1")
-        shutil.rmtree(version_path, ignore_errors=True)
-        return version_path
+    nvm_dir = os.environ.get("NVM_DIR") or __NVM_DIR__
+    version_path = os.path.join(nvm_dir, "versions", "node", "v8.16.1")
+    shutil.rmtree(version_path, ignore_errors=True)
+    return __NVM_DIR__, version_path
 
 
 @pytest.fixture
