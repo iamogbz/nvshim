@@ -18,10 +18,15 @@ snapshots["TestParseArgs.test_accepts_bin_file_arg 1"] = (
 )
 
 snapshots[
-    "TestMain.test_fails_when_nvm_dir_not_available[true] 1"
+    "TestMain.test_fails_when_nvm_dir_not_available 1"
 ] = """Executing shim version 0.0.0
 Environment variable 'NVM_DIR' missing"""
 
 snapshots[
-    "TestMain.test_fails_when_nvm_dir_not_available[false] 1"
-] = "Environment variable 'NVM_DIR' missing"
+    "TestMain.test_fails_when_version_not_installed 1"
+] = """Executing shim version 0.0.0
+N/A version 'lts/carbon' is not yet installed.
+
+You need to run 'nvm install lts/carbon' to install it before using it.
+
+Or set the environment variable 'NVSHIM_AUTO_INSTALL' to auto install at run time."""

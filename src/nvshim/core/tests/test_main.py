@@ -22,53 +22,61 @@ class TestParseArgs:
 
 
 class TestMain:
-    @pytest.mark.parametrize("verbose", ["true", "false"])
-    def test_fails_when_nvm_dir_not_available(self, mocker, capsys, verbose, snapshot):
-        with process_env({EnvironmentVariable.VERBOSE.value: verbose}), pytest.raises(
+    def test_fails_when_nvm_dir_not_available(
+        self, mocker, test_args, capsys, snapshot
+    ):
+        with process_env({EnvironmentVariable.VERBOSE.value: "true"}), pytest.raises(
             SystemExit
         ) as exc_info:
             runpy._run_module_as_main("nvshim.core")
 
-        assert exc_info.value.code.value == 1003
+        assert exc_info.value.code == 1003
         captured = capsys.readouterr()
         snapshot.assert_match(clean_output(captured.out))
         assert not captured.err
 
-    def test_fails_when_version_not_installed(self, mocker, capsys, snapshot):
-        mocked_sys_exit = mocker.patch("nvshim.core.__main__.sys.exit", autospec=True)
-        mock_env = {
-            **os.environ,
-            EnvironmentVariable.VERBOSE.value: "true",
-            EnvironmentVariable.AUTO_INSTALL.value: "false",
-        }
-        with process_env(mock_env):
-            runpy._run_module_as_main("nvshim.core")
-
-        captured = capsys.readouterr()
-        snapshot.assert_match(clean_output(captured.out))
-        assert not captured.err
-
-    @pytest.mark.parametrize("verbose", ["true", "false"])
-    def test_runs_correct_version_of_node(
-        self,
-        mocker,
-        verbose,
-        capsys,
-        snapshot,
-        test_args,
-        test_nested_workspace_with_nvmrc,
+    def test_fails_when_version_not_installed(
+        self, mocker, test_args, capsys, snapshot, test_nested_workspace_with_nvmrc
     ):
         mocker.patch(
             "nvshim.core.__main__.os.getcwd",
             autospec=True,
             return_value=test_nested_workspace_with_nvmrc,
         )
-        mocked_process_run = mocker.patch(
-            "nvshim.utils.process.subprocess.run", wraps=subprocess.run
-        )
-        with process_env({**os.environ, EnvironmentVariable.VERBOSE.value: verbose}):
+        mock_env = {
+            **os.environ,
+            EnvironmentVariable.VERBOSE.value: "true",
+            EnvironmentVariable.AUTO_INSTALL.value: "false",
+        }
+        with process_env(mock_env), pytest.raises(SystemExit) as exc_info:
             runpy._run_module_as_main("nvshim.core")
 
+        assert exc_info.value.code == 1001
         captured = capsys.readouterr()
-        snapshot.assert_match(captured.out, name="sysout")
-        snapshot.assert_match(captured.err, name="syserr")
+        snapshot.assert_match(clean_output(captured.out))
+        assert not captured.err
+
+    # @pytest.mark.parametrize("verbose", ["true", "false"])
+    # def test_runs_correct_version_of_node(
+    #     self,
+    #     mocker,
+    #     verbose,
+    #     capsys,
+    #     snapshot,
+    #     test_args,
+    #     test_nested_workspace_with_nvmrc,
+    # ):
+    #     mocker.patch(
+    #         "nvshim.core.__main__.os.getcwd",
+    #         autospec=True,
+    #         return_value=test_nested_workspace_with_nvmrc,
+    #     )
+    #     mocked_process_run = mocker.patch(
+    #         "nvshim.utils.process.subprocess.run", wraps=subprocess.run
+    #     )
+    #     with process_env({**os.environ, EnvironmentVariable.VERBOSE.value: verbose}):
+    #         runpy._run_module_as_main("nvshim.core")
+
+    #     captured = capsys.readouterr()
+    #     snapshot.assert_match(captured.out, name="sysout")
+    #     snapshot.assert_match(captured.err, name="syserr")
