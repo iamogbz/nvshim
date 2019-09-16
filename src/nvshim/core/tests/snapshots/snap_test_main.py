@@ -30,13 +30,3 @@ N/A version 'lts/carbon' is not yet installed.
 You need to run 'nvm install lts/carbon' to install it before using it.
 
 Or set the environment variable 'NVSHIM_AUTO_INSTALL' to auto install at run time."""
-
-snapshots[
-    "TestMain.test_runs_correct_version_of_node sysout"
-] = """Executing shim version 0.0.0
-Found '/Users/Emmanuel/Sources/nvshim/tmp/.nvmrc' with version <lts/carbon>
-./Users/Emmanuel/.nvm/versions/node/v8.16.1/bin/npm
-
-"""
-
-snapshots["TestMain.test_runs_correct_version_of_node syserr"] = ""
