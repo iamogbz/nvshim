@@ -158,7 +158,7 @@ def merge_nvm_aliases_with_node_versions(
     return dict(alias_versions, **node_versions)
 
 
-def get_nvmrc_path(exec_dir: str = os.getcwd()) -> str:
+def get_nvmrc_path(exec_dir: str) -> str:
     root_dir = os.path.abspath(os.sep)
     current_dir = exec_dir
     config_file = ".nvmrc"
@@ -257,7 +257,7 @@ def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
 def main(version_number: str = __version__):
     message.print_running_version(version_number)
     parsed_args, unknown_args = parse_args(sys.argv[1:])
-    nvmrc_path = get_nvmrc_path()
+    nvmrc_path = get_nvmrc_path(os.getcwd())
     version, parsed = get_nvmrc(nvmrc_path)
     try:
         nvm_dir = environment.get_nvm_dir()

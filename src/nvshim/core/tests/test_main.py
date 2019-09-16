@@ -6,7 +6,7 @@ import subprocess
 from nvshim.utils.constants import ErrorCode
 from nvshim.utils.environment import process_env, EnvironmentVariable
 from nvshim.utils.process import clean_output
-from nvshim.core.__main__ import parse_args
+from nvshim.core.__main__ import main, parse_args
 
 
 class TestParseArgs:
@@ -28,7 +28,7 @@ class TestMain:
         with process_env({EnvironmentVariable.VERBOSE.value: "true"}), pytest.raises(
             SystemExit
         ) as exc_info:
-            runpy._run_module_as_main("nvshim.core")
+            main()
 
         assert exc_info.value.code == 1003
         captured = capsys.readouterr()
@@ -49,7 +49,7 @@ class TestMain:
             EnvironmentVariable.AUTO_INSTALL.value: "false",
         }
         with process_env(mock_env), pytest.raises(SystemExit) as exc_info:
-            runpy._run_module_as_main("nvshim.core")
+            main()
 
         assert exc_info.value.code == 1001
         captured = capsys.readouterr()
