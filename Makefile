@@ -4,7 +4,7 @@ WITH_ENV = env $(ENVARS)
 
 VENV_BIN = venv/bin/
 PIP_EXEC = $(VENV_BIN)pip
-PYTEST_EXEC = $(WITH_ENV) $(VENV_BIN)pytest
+PYTEST_EXEC = $(WITH_ENV) $(VENV_BIN)pytest -v
 PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
 COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
 BLACK_EXEC = $(VENV_BIN)black

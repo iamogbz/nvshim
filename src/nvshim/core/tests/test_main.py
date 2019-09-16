@@ -80,9 +80,14 @@ class TestMain:
         }
         with process_env(mock_env):
             main()
-            nvd = get_node_versions_dir(os.environ["NVM_DIR"])
-            shutil.rmtree(get_node_version_bin_dir(nvd, "v8.16.1"), ignore_errors=True)
+            bin_dir = get_node_version_bin_dir(
+                get_node_versions_dir(mock_env["NVM_DIR"]), "8.16.1"
+            )
 
         captured = capsys.readouterr()
         snapshot.assert_match(captured.out, name="sysout")
         snapshot.assert_match(captured.err, name="syserr")
+        mocked_process_run.assert_called_with(
+            (f"{bin_dir}/{test_args[1]}", *test_args[2:]), check=True
+        )
+        shutil.rmtree(bin_dir, ignore_errors=True)
