@@ -1,12 +1,18 @@
 import pytest
 import os
 import runpy
+import shutil
 import subprocess
 
 from nvshim.utils.constants import ErrorCode
 from nvshim.utils.environment import process_env, EnvironmentVariable
 from nvshim.utils.process import clean_output
-from nvshim.core.__main__ import main, parse_args
+from nvshim.core.__main__ import (
+    get_node_version_bin_dir,
+    get_node_versions_dir,
+    main,
+    parse_args,
+)
 
 
 class TestParseArgs:
@@ -23,7 +29,7 @@ class TestParseArgs:
 
 class TestMain:
     def test_fails_when_nvm_dir_not_available(
-        self, mocker, test_args, capsys, snapshot
+        self, mocker, capsys, snapshot, test_args
     ):
         with process_env({EnvironmentVariable.VERBOSE.value: "true"}), pytest.raises(
             SystemExit
@@ -36,7 +42,7 @@ class TestMain:
         assert not captured.err
 
     def test_fails_when_version_not_installed(
-        self, mocker, test_args, capsys, snapshot, test_nested_workspace_with_nvmrc
+        self, mocker, capsys, snapshot, test_args, test_nested_workspace_with_nvmrc
     ):
         mocker.patch(
             "nvshim.core.__main__.os.getcwd",
@@ -56,27 +62,27 @@ class TestMain:
         snapshot.assert_match(clean_output(captured.out))
         assert not captured.err
 
-    # @pytest.mark.parametrize("verbose", ["true", "false"])
-    # def test_runs_correct_version_of_node(
-    #     self,
-    #     mocker,
-    #     verbose,
-    #     capsys,
-    #     snapshot,
-    #     test_args,
-    #     test_nested_workspace_with_nvmrc,
-    # ):
-    #     mocker.patch(
-    #         "nvshim.core.__main__.os.getcwd",
-    #         autospec=True,
-    #         return_value=test_nested_workspace_with_nvmrc,
-    #     )
-    #     mocked_process_run = mocker.patch(
-    #         "nvshim.utils.process.subprocess.run", wraps=subprocess.run
-    #     )
-    #     with process_env({**os.environ, EnvironmentVariable.VERBOSE.value: verbose}):
-    #         runpy._run_module_as_main("nvshim.core")
+    def test_runs_correct_version_of_node(
+        self, mocker, capsys, snapshot, test_args, test_nested_workspace_with_nvmrc
+    ):
+        mocker.patch(
+            "nvshim.core.__main__.os.getcwd",
+            autospec=True,
+            return_value=test_nested_workspace_with_nvmrc,
+        )
+        mocked_process_run = mocker.patch(
+            "nvshim.utils.process.subprocess.run", wraps=subprocess.run
+        )
+        mock_env = {
+            **os.environ,
+            EnvironmentVariable.VERBOSE.value: "true",
+            EnvironmentVariable.AUTO_INSTALL.value: "true",
+        }
+        with process_env(mock_env):
+            main()
+            nvd = get_node_versions_dir(os.environ["NVM_DIR"])
+            shutil.rmtree(get_node_version_bin_dir(nvd, "v8.16.1"), ignore_errors=True)
 
-    #     captured = capsys.readouterr()
-    #     snapshot.assert_match(captured.out, name="sysout")
-    #     snapshot.assert_match(captured.err, name="syserr")
+        captured = capsys.readouterr()
+        snapshot.assert_match(captured.out, name="sysout")
+        snapshot.assert_match(captured.err, name="syserr")
