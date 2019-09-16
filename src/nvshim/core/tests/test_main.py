@@ -15,9 +15,6 @@ from nvshim.core.__main__ import (
 )
 
 
-__NVM_DIR__ = os.path.join(os.path.expanduser("~"), ".nvm")
-
-
 class TestParseArgs:
     def test_raises_missing_bin_file(self):
         with pytest.raises(SystemExit):
@@ -53,13 +50,14 @@ class TestMain:
         test_nested_workspace_with_nvmrc,
         test_node_version_dir,
     ):
+        nvm_dir, _ = test_node_version_dir
         mocker.patch(
             "nvshim.core.__main__.os.getcwd",
             autospec=True,
             return_value=test_nested_workspace_with_nvmrc,
         )
         mock_env = {
-            EnvironmentVariable.NVM_DIR.value: __NVM_DIR__,
+            EnvironmentVariable.NVM_DIR.value: nvm_dir,
             **os.environ,
             EnvironmentVariable.VERBOSE.value: "true",
             EnvironmentVariable.AUTO_INSTALL.value: "false",
@@ -81,6 +79,7 @@ class TestMain:
         test_nested_workspace_with_nvmrc,
         test_node_version_dir,
     ):
+        nvm_dir, node_version_dir = test_node_version_dir
         mocker.patch(
             "nvshim.core.__main__.os.getcwd",
             autospec=True,
@@ -90,7 +89,7 @@ class TestMain:
             "nvshim.utils.process.subprocess.run", wraps=subprocess.run
         )
         mock_env = {
-            EnvironmentVariable.NVM_DIR.value: __NVM_DIR__,
+            EnvironmentVariable.NVM_DIR.value: nvm_dir,
             **os.environ,
             EnvironmentVariable.VERBOSE.value: "true",
             EnvironmentVariable.AUTO_INSTALL.value: "true",
@@ -98,9 +97,9 @@ class TestMain:
         with process_env(mock_env):
             main()
 
-        captured = capsys.readouterr()
-        snapshot.assert_match(captured.out, name="sysout")
-        snapshot.assert_match(captured.err, name="syserr")
         mocked_process_run.assert_called_with(
-            (f"{test_node_version_dir}/bin/{test_args[1]}", *test_args[2:]), check=True
+            (f"{node_version_dir}/bin/{test_args[1]}", *test_args[2:]), check=True
         )
+        captured = capsys.readouterr()
+        assert "with version <lts/carbon>" in clean_output(captured.out)
+        assert not captured.err
