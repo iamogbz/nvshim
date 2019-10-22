@@ -60,7 +60,7 @@ def test_workspace():
 @pytest.fixture
 def test_node_version_dir():
     nvm_dir = os.environ.get("NVM_DIR") or __NVM_DIR__
-    version_path = os.path.join(nvm_dir, "versions", "node", "v8.16.1")
+    version_path = os.path.join(nvm_dir, "versions", "node", "v8.16.2")
     shutil.rmtree(version_path, ignore_errors=True)
     return __NVM_DIR__, version_path
 

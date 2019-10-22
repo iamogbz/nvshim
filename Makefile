@@ -102,7 +102,7 @@ setup:
 setup.sanity:
 	make setup
 	echo 'lts/carbon' > .nvmrc
-	make sanity.check exec=$(VENV_BIN)node version="v8.16.1"
+	make sanity.check exec=$(VENV_BIN)node version="v8.16.2"
 	make sanity.check exec=$(VENV_BIN)npm version="6.4.1"
 	make sanity.check exec=$(VENV_BIN)npx version="6.4.1"
 	rm .nvmrc
