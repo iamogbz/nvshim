@@ -23,18 +23,10 @@ This will use existing [`.nvmrc`](https://github.com/nvm-sh/nvm#nvmrc) file, fal
 pip install nvshim
 ```
 
-### Build
-
-#### Clone project repository
+### Github
 
 ```sh
-git clone git@github.com:iamogbz/nvshim.git
-```
-
-#### Pip install python project
-
-```sh
-pip install nvshim/
+pip install git+git://github.com/iamogbz/nvshim.git
 ```
 
 ## Configuration
