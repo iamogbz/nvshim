@@ -4,7 +4,7 @@ black
 coverage
 coveralls
 pylint
-python-githooks
+py-githooks
 rope
 twine
 wheel
