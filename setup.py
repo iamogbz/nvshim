@@ -62,11 +62,13 @@ def get_requirements(filepath: str, visited: [str]) -> [str]:
     return list(requirements)
 
 
-def version_local_scheme(version):
-    node = version.node or ""
-    current = datetime.now()
-    seconds = current.hour * current.minute * current.second
-    return f"{node}{current.year}{current.month}{current.day}{seconds}"
+def version_scheme(version):
+    if version.exact:
+        return version.format_with("{tag}")
+    else:
+        now = datetime.now()
+        seconds = (now.hour * 60) + (now.minute * 60) + now.second
+        return f"{now.year}.{now.month}.{now.day}.{seconds}"
 
 
 setup(
@@ -100,8 +102,9 @@ setup(
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",
     use_scm_version={
-        "local_scheme": version_local_scheme,
+        "local_scheme": lambda _: "",
+        "version_scheme": version_scheme,
         "write_to": "./src/nvshim/__init__.py",
-        "write_to_template": '__version__ = "{version}"',
+        "write_to_template": '__version__ = "{version}"\n',
     },
 )
