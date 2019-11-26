@@ -31,9 +31,11 @@ class TestMain:
     def test_fails_when_nvm_dir_not_available(
         self, mocker, capsys, snapshot, test_args
     ):
-        with process_env({EnvironmentVariable.VERBOSE.value: "true"}), pytest.raises(
-            SystemExit
-        ) as exc_info:
+        mock_env = {
+            EnvironmentVariable.VERBOSE.value: "true",
+            "SETUPTOOLS_SCM_PRETEND_VERSION": "0.0.0",
+        }
+        with process_env(mock_env), pytest.raises(SystemExit) as exc_info:
             main()
 
         assert exc_info.value.code == 1003
@@ -61,6 +63,7 @@ class TestMain:
             **os.environ,
             EnvironmentVariable.VERBOSE.value: "true",
             EnvironmentVariable.AUTO_INSTALL.value: "false",
+            "SETUPTOOLS_SCM_PRETEND_VERSION": "0.0.0",
         }
         with process_env(mock_env), pytest.raises(SystemExit) as exc_info:
             main()
