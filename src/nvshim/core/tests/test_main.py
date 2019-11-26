@@ -31,8 +31,9 @@ class TestMain:
     def test_fails_when_nvm_dir_not_available(
         self, mocker, capsys, snapshot, test_args
     ):
-        mock_env = {EnvironmentVariable.VERBOSE.value: "true"}
-        with process_env(mock_env), pytest.raises(SystemExit) as exc_info:
+        with process_env({EnvironmentVariable.VERBOSE.value: "true"}), pytest.raises(
+            SystemExit
+        ) as exc_info:
             main()
 
         assert exc_info.value.code == 1003
