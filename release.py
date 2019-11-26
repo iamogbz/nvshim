@@ -53,7 +53,7 @@ def _publish(*, version: str, dry_run: bool = True):
 def main():
     _clean()
     _build()
-    version = _get_version()
+    from nvshim import version
 
     if version:
         _publish(version=version, dry_run=True)

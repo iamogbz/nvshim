@@ -9,4 +9,4 @@ htmlcov
 venv
 build
 dist
-version.txt
+src/nvshim/__init__.py

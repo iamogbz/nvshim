@@ -91,5 +91,5 @@ setup(
     setup_requires=["setuptools_scm"],
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",
-    use_scm_version={"write_to": "version.txt"},
+    use_scm_version={"write_to": "./src/nvshim/__init__.py"},
 )
