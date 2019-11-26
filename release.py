@@ -10,7 +10,7 @@ dist_path = "dist"
 
 def _is_valid_release_version(version: str) -> bool:
     try:
-        return version.startswith("v") and semver.parse_version_info(version[1:])
+        return semver.parse_version_info(version)
     except:
         pass
 
