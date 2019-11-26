@@ -8,15 +8,6 @@ from nvshim.utils import process
 dist_path = "dist"
 
 
-def _get_version() -> str:
-    try:
-        with open("version.txt", "r") as f:
-            version = str(f.read())
-        return version
-    except:
-        pass
-
-
 def _is_valid_release_version(version: str) -> bool:
     try:
         return version.startswith("v") and semver.parse_version_info(version[1:])
@@ -56,7 +47,7 @@ def main():
     from nvshim import version
 
     if version:
-        _publish(version=version, dry_run=True)
+        _publish(version=version.split("+")[0], dry_run=True)
     else:
         return print("No build version")
 
