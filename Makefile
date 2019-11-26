@@ -72,6 +72,7 @@ test:
 
 .PHONY: coverage
 coverage:
+	export SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0
 	@$(COVERAGE_EXEC) run --source=src -m pytest
 	@$(COVERAGE_EXEC) html
 
