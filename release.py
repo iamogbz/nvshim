@@ -33,7 +33,7 @@ def _get_publish_command(*, dry_run: bool = True):
     return cmd
 
 
-def _publish(*, version: str, dry_run: bool = True):
+def _publish(*, dry_run: bool = True):
     print("Publishing...")
     print("Target:", "test.pypi.org" if dry_run else "pypi.org")
     process.run(*_get_publish_command(dry_run=dry_run))
@@ -44,15 +44,15 @@ def _publish(*, version: str, dry_run: bool = True):
 def main():
     _clean()
     _build()
-    from nvshim import version
+    from nvshim import __version__
 
-    if version:
-        _publish(version=version.split("+")[0], dry_run=True)
+    if __version__:
+        _publish(dry_run=True)
     else:
         return print("No build version")
 
-    if _is_valid_release_version(version):
-        _publish(version=version, dry_run=False)
+    if _is_valid_release_version(__version__):
+        _publish(dry_run=False)
     else:
         return print("No release version")
 

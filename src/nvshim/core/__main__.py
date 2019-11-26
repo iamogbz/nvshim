@@ -8,7 +8,7 @@ from typing import Callable, Dict, List, Sequence, Set, Union
 
 import semver
 
-from nvshim import version
+from nvshim import __version__
 from nvshim.utils import environment, message, process
 from nvshim.utils.constants import ErrorCode
 
@@ -254,7 +254,7 @@ def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
     return parser.parse_known_args(args)
 
 
-def main(version_number: str = version):
+def main(version_number: str = __version__):
     message.print_running_version(version_number)
     parsed_args, unknown_args = parse_args(sys.argv[1:])
     nvmrc_path = get_nvmrc_path(os.getcwd())

@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 
 sys.path.append("src")
 
@@ -61,6 +62,13 @@ def get_requirements(filepath: str, visited: [str]) -> [str]:
     return list(requirements)
 
 
+def version_local_scheme(version):
+    node = version.node or ""
+    current = datetime.now()
+    seconds = current.hour * current.minute * current.second
+    return f"{node}{current.year}{current.month}{current.day}{seconds}"
+
+
 setup(
     author="Emmanuel Ogbizi-Ugbe",
     author_email="iamogbz+pypi@gmail.com",
@@ -91,5 +99,9 @@ setup(
     setup_requires=["setuptools_scm"],
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",
-    use_scm_version={"write_to": "./src/nvshim/__init__.py"},
+    use_scm_version={
+        "local_scheme": version_local_scheme,
+        "write_to": "./src/nvshim/__init__.py",
+        "write_to_template": '__version__ = "{version}"',
+    },
 )
