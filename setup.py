@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 
 sys.path.append("src")
 
@@ -6,7 +7,6 @@ import os
 from setuptools import setup
 from typing import Sequence
 
-from nvshim import __version__
 from nvshim.utils.constants import shims
 
 
@@ -62,6 +62,15 @@ def get_requirements(filepath: str, visited: [str]) -> [str]:
     return list(requirements)
 
 
+def version_scheme(version):
+    if version.exact:
+        return version.format_with("{tag}")
+    else:
+        now = datetime.now()
+        seconds = (now.hour * 60) + (now.minute * 60) + now.second
+        return f"{now.year}.{now.month}.{now.day}.{seconds}"
+
+
 setup(
     author="Emmanuel Ogbizi-Ugbe",
     author_email="iamogbz+pypi@gmail.com",
@@ -89,7 +98,13 @@ setup(
     name="nvshim",
     packages=["nvshim", "nvshim.core", "nvshim.utils"],
     package_dir={"": "src"},
+    setup_requires=["setuptools_scm"],
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",
-    version=__version__,
+    use_scm_version={
+        "local_scheme": lambda _: "",
+        "version_scheme": version_scheme,
+        "write_to": "./src/nvshim/__init__.py",
+        "write_to_template": '__version__ = "{version}"\n',
+    },
 )

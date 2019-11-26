@@ -72,6 +72,7 @@ test:
 
 .PHONY: coverage
 coverage:
+	@git checkout .
 	@$(COVERAGE_EXEC) run --source=src -m pytest
 	@$(COVERAGE_EXEC) html
 
@@ -99,8 +100,7 @@ setup:
 	$(PYTHON_SETUP)
 
 .PHONY: setup.sanity
-setup.sanity:
-	make setup
+setup.sanity: setup
 	echo 'lts/carbon' > .nvmrc
 	make sanity.check exec=$(VENV_BIN)node version="v8.16.2"
 	make sanity.check exec=$(VENV_BIN)npm version="6.4.1"
