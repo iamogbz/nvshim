@@ -6,7 +6,6 @@ import os
 from setuptools import setup
 from typing import Sequence
 
-from nvshim import __version__
 from nvshim.utils.constants import shims
 
 
@@ -89,7 +88,8 @@ setup(
     name="nvshim",
     packages=["nvshim", "nvshim.core", "nvshim.utils"],
     package_dir={"": "src"},
+    setup_requires=["setuptools_scm"],
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",
-    version=__version__,
+    use_scm_version={"write_to": "version.txt"},
 )

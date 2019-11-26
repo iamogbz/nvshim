@@ -1,5 +1,6 @@
 *.egg
 *.egg-info
+.eggs
 *.pyc
 .pytest_cache
 artifacts
@@ -8,3 +9,4 @@ htmlcov
 venv
 build
 dist
+version.txt
