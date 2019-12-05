@@ -66,9 +66,7 @@ def version_scheme(version):
     if version.exact:
         return version.format_with("{tag}")
     else:
-        now = datetime.now()
-        seconds = (now.hour * 60) + (now.minute * 60) + now.second
-        return f"{now.year}.{now.month}.{now.day}.{seconds}"
+        return datetime.now().strftime("%Y.%m.%d.%H%M%S%f")
 
 
 setup(
