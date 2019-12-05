@@ -1,7 +1,9 @@
 import os
+import importlib
 
 import semver
 
+import nvshim
 from nvshim.utils import process
 
 
@@ -34,7 +36,6 @@ def _get_publish_command(*, dry_run: bool = True):
 
 
 def _publish(*, dry_run: bool = True):
-    print("Publishing...")
     print("Target:", "test.pypi.org" if dry_run else "pypi.org")
     process.run(*_get_publish_command(dry_run=dry_run))
 
@@ -44,7 +45,9 @@ def _publish(*, dry_run: bool = True):
 def main():
     _clean()
     _build()
-    from nvshim import __version__
+
+    __version__ = importlib.reload(nvshim).__version__
+    print(f"Publishing: {__version__}")
 
     if __version__:
         _publish(dry_run=True)
