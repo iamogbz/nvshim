@@ -101,7 +101,7 @@ setup:
 
 .PHONY: setup.sanity
 setup.sanity: setup
-	echo 'lts/carbon' > .nvmrc
+	echo 'v8.16.2' > .nvmrc
 	make sanity.check exec=$(VENV_BIN)node version="v8.16.2"
 	make sanity.check exec=$(VENV_BIN)npm version="6.4.1"
 	make sanity.check exec=$(VENV_BIN)npx version="6.4.1"

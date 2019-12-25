@@ -101,5 +101,5 @@ class TestMain:
             (f"{node_version_dir}/bin/{test_args[1]}", *test_args[2:]), check=True
         )
         captured = capsys.readouterr()
-        assert "with version <lts/carbon>" in clean_output(captured.out)
+        assert "with version <v8.16.2>" in clean_output(captured.out)
         assert not captured.err

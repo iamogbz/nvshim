@@ -8,7 +8,7 @@ import pytest
 
 
 __TEST_DIR__ = os.path.join(os.environ["PWD"], "tmp")
-__TEST_DIR_STRUCTURE__ = {".nvmrc": "lts/carbon"}
+__TEST_DIR_STRUCTURE__ = {".nvmrc": "v8.16.2"}
 __NVM_DIR__ = os.path.join(os.path.expanduser("~"), ".nvm")
 
 
