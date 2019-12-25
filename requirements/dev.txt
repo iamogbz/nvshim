@@ -1,8 +1,8 @@
 -r prod.txt
 -r test.txt
 black
-coverage
-coveralls
+coverage==4.5.4
+coveralls==1.9.2
 pylint
 py-githooks
 rope
