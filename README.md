@@ -47,6 +47,12 @@ Set to `1` or `true` to show more information on the shimmed node process.
 
 Otherwise set to `0` or `false` or nothing.
 
+## Caveats
+
+To allow the `nvshim` installed `node` shim work in all directories, you'll need to stop sourcing `nvm.sh` in your shell rc i.e. `bash_profile`, `zshrc` etc. 
+
+Just comment out the `source /Users/me/.nvm/nvm.sh` in your shell startup script. This is optional and prevents `nvm` from taking control of your shell path on launch.
+
 ## Contribution
 
 All forms of contribution welcome, please see [guide](./CONTRIBUTING.md).
