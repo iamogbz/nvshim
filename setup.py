@@ -10,20 +10,6 @@ from typing import Sequence
 from nvshim.utils.constants import shims
 
 
-def build_shims():
-    shim_bins = []
-    bins_path = "build/bin"
-    os.makedirs(bins_path, exist_ok=True)
-    with open("src/nvshim/core/shim.py", "r") as shim_file:
-        shim_code = shim_file.read()
-        for bin_name in shims:
-            bin_path = os.path.join(bins_path, bin_name)
-            with open(bin_path, "w") as bin_file:
-                bin_file.write(shim_code)
-            shim_bins.append(bin_path)
-    return shim_bins
-
-
 def readme() -> str:
     with open("README.md") as f:
         return f.read()
@@ -100,7 +86,7 @@ setup(
         "Topic :: Software Development",
     ],
     description="Automagically use the correct version of node",
-    scripts=build_shims(),
+    entry_points={"console_scripts": [f"{s}=nvshim.core.shim:main" for s in shims]},
     include_package_data=True,
     install_requires=get_requirements("requirements/prod.txt", []),
     keywords="node nvm node-shim shim shell nvm-shim",

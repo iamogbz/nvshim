@@ -5,12 +5,13 @@ import nvshim.core.__main__ as core
 
 
 def main():
-    sys.argv.insert(1, os.path.basename(sys.argv[0]))
-    core.main()
+    try:
+        sys.argv.insert(1, os.path.basename(sys.argv[0]))
+        core.main()
+    except KeyboardInterrupt as e:
+        print(f'Interrupted: {e}')
+        return 130
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        pass
+    main()
