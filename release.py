@@ -28,7 +28,7 @@ def _build():
 
 
 def _get_publish_command(*, dry_run: bool = True):
-    cmd = ["twine", "upload"]
+    cmd = ["twine", "upload", "--skip-existing"]
     if dry_run:
         cmd.extend(["--repository-url", "https://test.pypi.org/legacy/"])
     cmd.append(os.path.join(dist_path, "*"))
