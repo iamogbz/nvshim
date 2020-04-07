@@ -1,0 +1,3 @@
+# name: test_shim_handles_process_interrupt
+  'Interrupted. Ctrl+C'
+---
