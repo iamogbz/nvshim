@@ -80,3 +80,7 @@ def print_running_version(version_number: str):
 
 def print_unable_to_get_stable_version():
     _print_error("Unable to retrieve stable version from nvm")
+
+
+def print_process_interrupted(exc: KeyboardInterrupt):
+    _print(f"\nInterrupted. {exc}")
