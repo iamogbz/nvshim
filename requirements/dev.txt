@@ -1,7 +1,7 @@
 -r prod.txt
 -r test.txt
 black
-coverage==4.5.4
+coverage==5.1
 coveralls==2.0.0
 pylint
 py-githooks
