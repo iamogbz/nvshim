@@ -5,6 +5,7 @@ import sys
 from typing import Dict
 
 from .environment import EnvironmentVariable, EnvDict, process_env
+from .message import print_unable_to_run_node
 
 
 def _with_venv(env: EnvDict):
@@ -21,6 +22,7 @@ def run(*args, **kwargs) -> subprocess.CompletedProcess:
         with process_env(env_vars):
             return subprocess.run(args, **kwargs, check=True)
     except subprocess.CalledProcessError as error:
+        print_unable_to_run_node(error)
         sys.exit(error.returncode)
 
 

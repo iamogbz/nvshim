@@ -1,4 +1,5 @@
 from enum import Enum, IntEnum
+from subprocess import CalledProcessError
 
 from colored import fg, stylize
 
@@ -84,3 +85,7 @@ def print_unable_to_get_stable_version():
 
 def print_process_interrupted(exc: KeyboardInterrupt):
     _print(f"\nInterrupted. {exc}")
+
+
+def print_unable_to_run_node(exc: CalledProcessError):
+    _print(str(exc))
