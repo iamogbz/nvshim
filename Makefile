@@ -101,10 +101,10 @@ setup:
 
 .PHONY: setup.sanity
 setup.sanity: setup
-	echo 'v8.16.2' > .nvmrc
-	make sanity.check exec=$(VENV_BIN)node version="v8.16.2"
-	make sanity.check exec=$(VENV_BIN)npm version="6.4.1"
-	make sanity.check exec=$(VENV_BIN)npx version="6.4.1"
+	echo 'v14.5.0' > .nvmrc
+	make sanity.check exec=$(VENV_BIN)node version="v14.5.0"
+	make sanity.check exec=$(VENV_BIN)npm version="6.14.5"
+	make sanity.check exec=$(VENV_BIN)npx version="6.14.5"
 	rm .nvmrc
 
 .PHONY: setup.debug
