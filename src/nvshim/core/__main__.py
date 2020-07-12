@@ -84,7 +84,7 @@ def get_nvm_aliases(nvm_dir: str) -> AliasMapping:
 
 def parse_version(version: str) -> semver.VersionInfo:
     try:
-        return semver.parse_version_info(
+        return semver.VersionInfo.parse(
             version[1:] if version.startswith("v") else version
         )
     except ValueError:
