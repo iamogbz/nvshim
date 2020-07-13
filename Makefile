@@ -2,7 +2,7 @@ $(shell test -s ".env" || cp ".env.example" ".env")
 ENVARS := $(shell cat ".env" | xargs)
 WITH_ENV = env $(ENVARS)
 
-VENV_BIN = venv/bin/
+VENV_BIN = 
 PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
 PYTHON_MODULE = $(PYTHON_EXEC) -m 
 PIP_EXEC = $(PYTHON_MODULE) pip
@@ -39,7 +39,6 @@ help:
 .PHONY: venv
 venv:
 	test -d venv || python3 -m venv venv
-	touch $(VENV_BIN)activate
 
 .PHONY: install
 install: venv
