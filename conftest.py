@@ -15,7 +15,7 @@ __NVM_DIR__ = os.path.join(os.path.expanduser("~"), ".nvm")
 @pytest.fixture
 def test_args():
     initial_args = list(sys.argv)
-    sys.argv = sys.argv[:1] + ["npm", "--version", "--help"]
+    sys.argv = sys.argv[:1] + ["npm", "--version"]
     yield sys.argv
     sys.argv = initial_args
 
