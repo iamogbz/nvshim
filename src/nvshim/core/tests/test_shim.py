@@ -11,7 +11,7 @@ from nvshim.utils.process import clean_output
 @pytest.fixture
 def test_shim_args():
     initial_args = list(sys.argv)
-    sys.argv = ["/full/path/to/shim/node", "--version"]
+    sys.argv = ["/full/path/to/shim/node", "--version", "--help"]
     yield sys.argv
     sys.argv = initial_args
 
