@@ -3,11 +3,12 @@ ENVARS := $(shell cat ".env" | xargs)
 WITH_ENV = env $(ENVARS)
 
 VENV_BIN = venv/bin/
-PIP_EXEC = $(VENV_BIN)pip
-PYTEST_EXEC = $(WITH_ENV) $(VENV_BIN)pytest -v
 PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
-COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
-BLACK_EXEC = $(VENV_BIN)black
+PYTHON_MODULE = $(PYTHON_EXEC) -m 
+PIP_EXEC = $(PYTHON_MODULE) pip
+PYTEST_EXEC = $(PYTHON_MODULE) pytest -v
+COVERAGE_EXEC = $(PYTHON_MODULE) coverage
+BLACK_EXEC = $(PYTHON_MODULE) black
 
 PYTHON_SETUP = $(PYTHON_EXEC) setup.py install
 
@@ -19,15 +20,6 @@ upstream:
 	@git push origin master
 	@git push --all
 	@echo "upstream: remote successfully configured"
-
-.PHONY: eject
-eject:
-	@git fetch --all --prune
-	@git checkout -b boilerplate-ejection
-	@git pull upstream master --allow-unrelated-histories --no-edit -Xours
-	@git pull upstream boilerplate-ejection --no-edit -Xours
-	@git reset master --soft && git add --all && git commit -m "chore: eject" -n
-	@echo "eject: branch created, complete by replacing placeholder values"
 
 .PHONY: help
 help:
