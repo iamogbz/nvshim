@@ -157,7 +157,7 @@ def merge_nvm_aliases_with_node_versions(
         for alias, version in nvm_aliases.items()
         if version in node_versions
     }
-    return dict(alias_versions, **node_versions)
+    return {**alias_versions, **node_versions}
 
 
 def get_nvmrc_path(exec_dir: str) -> str:
