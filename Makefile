@@ -2,12 +2,13 @@ $(shell test -s ".env" || cp ".env.example" ".env")
 ENVARS := $(shell cat ".env" | xargs)
 WITH_ENV = env $(ENVARS)
 
-VENV_BIN = 
+VENV_BIN = venv/bin/
 PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
 PYTHON_MODULE = $(PYTHON_EXEC) -m 
 PIP_EXEC = $(PYTHON_MODULE) pip
 PYTEST_EXEC = $(PYTHON_MODULE) pytest -v
 COVERAGE_EXEC = $(PYTHON_MODULE) coverage
+COVERALLS_EXEC = $(PYTHON_MODULE) coveralls
 BLACK_EXEC = $(PYTHON_MODULE) black
 
 PYTHON_SETUP = $(PYTHON_EXEC) setup.py install
@@ -69,7 +70,7 @@ coverage:
 
 .PHONY: report
 report:
-	$(COVERAGE_EXEC) xml && $(VENV_BIN)coveralls
+	$(COVERAGE_EXEC) xml && $(COVERALLS_EXEC)
 
 .PHONY: run
 run:
