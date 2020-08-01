@@ -79,8 +79,9 @@ def print_running_version(version_number: str):
     _print(f"Executing shim version {version_number}", level=MessageLevel.QUIET)
 
 
-def print_unable_to_get_stable_version():
+def print_unable_to_get_stable_version(exc: Exception):
     _print_error("Unable to retrieve stable version from nvm")
+    _print(str(exc), level=MessageLevel.QUIET)
 
 
 def print_process_interrupted(exc: KeyboardInterrupt):

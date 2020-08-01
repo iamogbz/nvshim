@@ -61,8 +61,8 @@ def get_nvm_stable_version(nvm_dir) -> str:
     ).stdout
     try:
         return re.findall(r"> v([\w\.]+)", process.clean_output(output))[0]
-    except (IndexError, KeyError):
-        message.print_unable_to_get_stable_version()
+    except (IndexError, KeyError) as exc:
+        message.print_unable_to_get_stable_version(exc)
 
 
 def get_nvm_aliases_dir(nvm_dir: str) -> str:
