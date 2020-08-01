@@ -79,7 +79,7 @@ run:
 sanities:
 	touch $(PROFILE)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
-	. $(PROFILE) && nvm install stable
+	. $(PROFILE) && nvm install stable && nvm alias default stable
 	make setup.sanity
 
 .PHONY: sanity.check
