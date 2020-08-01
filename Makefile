@@ -64,7 +64,7 @@ test:
 .PHONY: coverage
 coverage:
 	@git checkout .
-	@$(COVERAGE_EXEC) run --source=src -m pytest
+	@$(COVERAGE_EXEC) run --source=src -m pytest src/nvshim/core/tests/test_main.py::TestMain::test_runs_correct_version_of_node -vv -s
 	@$(COVERAGE_EXEC) html
 
 .PHONY: report
