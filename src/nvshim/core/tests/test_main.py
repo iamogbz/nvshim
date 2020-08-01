@@ -101,6 +101,5 @@ class TestMain:
             (f"{node_version_dir}/bin/{test_args[1]}", *test_args[2:]), check=True
         )
         captured = capsys.readouterr()
-        print(clean_output(captured.out))
         assert "with version <v14.5.0>" in clean_output(captured.out)
         assert not captured.err

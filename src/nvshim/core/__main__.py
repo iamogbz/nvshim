@@ -210,10 +210,8 @@ def get_bin_path(
         nvm_aliases = resolve_nvm_aliases(nvm_aliases)
     version_mapping = merge_nvm_aliases_with_node_versions(nvm_aliases, node_versions)
     try:
-        print("version mapping", version_mapping)
         node_path = version_mapping[version]
     except KeyError:
-        print("get bin path auto", environment.is_version_auto_install_enabled())
         if not environment.is_version_auto_install_enabled():
             message.print_version_not_installed(
                 _pretty_version(version, is_version_parsed)
