@@ -64,7 +64,7 @@ test:
 .PHONY: coverage
 coverage:
 	@git checkout .
-	@$(COVERAGE_EXEC) run --source=src -m pytest -vv
+	@$(COVERAGE_EXEC) run --source=src -m pytest
 	@$(COVERAGE_EXEC) html
 
 .PHONY: report
