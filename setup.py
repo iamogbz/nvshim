@@ -96,6 +96,7 @@ setup(
     name="nvshim",
     packages=["nvshim", "nvshim.core", "nvshim.utils"],
     package_dir={"": "src"},
+    python_requires=">=3",
     setup_requires=["setuptools_scm"],
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",

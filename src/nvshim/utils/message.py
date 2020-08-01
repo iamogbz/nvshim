@@ -1,4 +1,5 @@
 from enum import Enum, IntEnum
+from subprocess import CalledProcessError
 
 from colored import fg, stylize
 
@@ -78,9 +79,14 @@ def print_running_version(version_number: str):
     _print(f"Executing shim version {version_number}", level=MessageLevel.QUIET)
 
 
-def print_unable_to_get_stable_version():
+def print_unable_to_get_stable_version(exc: Exception):
     _print_error("Unable to retrieve stable version from nvm")
+    _print(str(exc), level=MessageLevel.QUIET)
 
 
 def print_process_interrupted(exc: KeyboardInterrupt):
     _print(f"\nInterrupted. {exc}")
+
+
+def print_unable_to_run_node(exc: CalledProcessError):
+    _print(str(exc))

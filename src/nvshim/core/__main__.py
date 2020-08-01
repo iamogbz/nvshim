@@ -61,8 +61,8 @@ def get_nvm_stable_version(nvm_dir) -> str:
     ).stdout
     try:
         return re.findall(r"> v([\w\.]+)", process.clean_output(output))[0]
-    except (IndexError, KeyError):
-        message.print_unable_to_get_stable_version()
+    except (IndexError, KeyError) as exc:
+        message.print_unable_to_get_stable_version(exc)
 
 
 def get_nvm_aliases_dir(nvm_dir: str) -> str:
@@ -83,12 +83,14 @@ def get_nvm_aliases(nvm_dir: str) -> AliasMapping:
 
 
 def parse_version(version: str) -> semver.VersionInfo:
+    if not version:
+        return None
     try:
-        return semver.parse_version_info(
+        return semver.VersionInfo.parse(
             version[1:] if version.startswith("v") else version
         )
     except ValueError:
-        pass
+        return None
 
 
 @functools.lru_cache(maxsize=None)
@@ -122,7 +124,7 @@ def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> AliasMapping:
     resolved_aliases = {}
     for alias, version in nvm_aliases.items():
         version_info = (
-            type(version) is str and parse_version(version)
+            isinstance(version, str) and parse_version(version)
         ) or resolve_alias(version, nvm_aliases)[0]
 
         if version_info:
@@ -155,7 +157,7 @@ def merge_nvm_aliases_with_node_versions(
         for alias, version in nvm_aliases.items()
         if version in node_versions
     }
-    return dict(alias_versions, **node_versions)
+    return {**alias_versions, **node_versions}
 
 
 def get_nvmrc_path(exec_dir: str) -> str:

@@ -1,0 +1,25 @@
+name: Dependabot
+on: pull_request
+
+jobs:
+  approve:
+    if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: hmarr/auto-approve-action@v2.0.0
+      with:
+        github-token: "${{ secrets.GITHUB_TOKEN }}"
+  merge:
+    if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/github-script@v2
+      with:
+        github-token: ${{secrets.GH_TOKEN}}
+        script: |
+          await github.issues.createComment({
+            owner: context.payload.repository.owner.login,
+            repo: context.payload.repository.name,
+            issue_number: context.payload.pull_request.number,
+            body: '@dependabot merge'
+          })

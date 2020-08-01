@@ -3,11 +3,13 @@ ENVARS := $(shell cat ".env" | xargs)
 WITH_ENV = env $(ENVARS)
 
 VENV_BIN = venv/bin/
-PIP_EXEC = $(VENV_BIN)pip
-PYTEST_EXEC = $(WITH_ENV) $(VENV_BIN)pytest -v
 PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
-COVERAGE_EXEC = $(WITH_ENV) $(VENV_BIN)coverage
-BLACK_EXEC = $(VENV_BIN)black
+PYTHON_MODULE = $(PYTHON_EXEC) -m 
+PIP_EXEC = $(PYTHON_MODULE) pip
+PYTEST_EXEC = $(PYTHON_MODULE) pytest -v
+COVERAGE_EXEC = $(PYTHON_MODULE) coverage
+COVERALLS_EXEC = $(PYTHON_MODULE) coveralls
+BLACK_EXEC = $(PYTHON_MODULE) black
 
 PYTHON_SETUP = $(PYTHON_EXEC) setup.py install
 
@@ -19,15 +21,6 @@ upstream:
 	@git push origin master
 	@git push --all
 	@echo "upstream: remote successfully configured"
-
-.PHONY: eject
-eject:
-	@git fetch --all --prune
-	@git checkout -b boilerplate-ejection
-	@git pull upstream master --allow-unrelated-histories --no-edit -Xours
-	@git pull upstream boilerplate-ejection --no-edit -Xours
-	@git reset master --soft && git add --all && git commit -m "chore: eject" -n
-	@echo "eject: branch created, complete by replacing placeholder values"
 
 .PHONY: help
 help:
@@ -47,7 +40,6 @@ help:
 .PHONY: venv
 venv:
 	test -d venv || python3 -m venv venv
-	touch $(VENV_BIN)activate
 
 .PHONY: install
 install: venv
@@ -78,7 +70,7 @@ coverage:
 
 .PHONY: report
 report:
-	$(COVERAGE_EXEC) xml && $(VENV_BIN)coveralls
+	$(COVERAGE_EXEC) xml && $(COVERALLS_EXEC)
 
 .PHONY: run
 run:
@@ -88,7 +80,7 @@ run:
 sanities:
 	touch $(PROFILE)
 	curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | PROFILE=$(PROFILE) bash
-	. $(PROFILE) && nvm install stable
+	. $(PROFILE) && nvm install stable && nvm alias default stable
 	make setup.sanity
 
 .PHONY: sanity.check
@@ -101,10 +93,10 @@ setup:
 
 .PHONY: setup.sanity
 setup.sanity: setup
-	echo 'v8.16.2' > .nvmrc
-	make sanity.check exec=$(VENV_BIN)node version="v8.16.2"
-	make sanity.check exec=$(VENV_BIN)npm version="6.4.1"
-	make sanity.check exec=$(VENV_BIN)npx version="6.4.1"
+	echo 'v14.5.0' > .nvmrc
+	make sanity.check exec=$(VENV_BIN)node version="v14.5.0"
+	make sanity.check exec=$(VENV_BIN)npm version="6.14.5"
+	make sanity.check exec=$(VENV_BIN)npx version="6.14.5"
 	rm .nvmrc
 
 .PHONY: setup.debug

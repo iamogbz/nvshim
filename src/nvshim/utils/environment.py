@@ -35,7 +35,7 @@ def _set_envs(values: EnvDict):
 
 @contextmanager
 def process_env(env_vars: EnvDict):
-    prev_env_vars = dict(os.environ)
+    prev_env_vars = {**os.environ}
     _set_envs(env_vars)
     yield
     _set_envs(prev_env_vars)
