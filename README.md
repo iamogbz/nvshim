@@ -9,7 +9,7 @@ Automagically use the correct version of node with [`nvm exec`](https://github.c
 [![Pypi](https://img.shields.io/pypi/v/nvshim)](https://pypi.org/project/nvshim/)
 ![Stage](https://img.shields.io/pypi/status/nvshim)
 ![Wheel](https://img.shields.io/pypi/wheel/nvshim)
-[![Dependabot badge](https://badgen.net/dependabot/iamogbz/nvshim/?icon=dependabot)](https://app.dependabot.com)
+[![Dependabot badge](https://badgen.net/github/dependabot/iamogbz/nvshim/?icon=dependabot)](https://app.dependabot.com)
 
 > **No more `nvm use`**
 
