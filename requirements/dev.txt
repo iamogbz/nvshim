@@ -2,7 +2,7 @@
 -r test.txt
 black
 coverage==5.1
-coveralls==3.0.0
+coveralls==3.0.1
 pylint
 py-githooks
 rope
