@@ -1,5 +1,9 @@
 name: Python App
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  pull_request_target:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,11 +29,13 @@ jobs:
       run: |
         make coverage
     - name: Report coverage
+      if:  github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         make report
     - name: Run release
+      if:  github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
@@ -37,6 +43,7 @@ jobs:
         make deploy
   release:
     runs-on: ubuntu-latest
+    if:  github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
     steps:
       - uses: actions/checkout@v1
       - uses: cycjimmy/semantic-release-action@v2
