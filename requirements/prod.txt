@@ -1,2 +1,2 @@
-colored==1.4.2
+colored==1.4.3
 semver==2.13.0
