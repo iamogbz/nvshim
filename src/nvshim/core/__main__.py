@@ -2,6 +2,7 @@ import argparse
 import functools
 import os
 import re
+import shlex
 import subprocess
 import sys
 from typing import Callable, Dict, List, Sequence, Set, Union
@@ -49,9 +50,17 @@ def get_files(path: str) -> [str]:
 def run_nvm_cmd(
     nvm_sh_path: str, nvm_args: str, **kwargs: dict
 ) -> process.subprocess.CompletedProcess:
-    return process.run(
-        f". {nvm_sh_path} && nvm {nvm_args}", shell="bash", encoding="UTF-8", **kwargs
-    )
+    nvshim_file_path = f"{os.path.dirname(sys.argv[0])}/nvm_shim.sh.tmp"
+    try:
+        with open(nvshim_file_path, "w") as nvshim_file:
+            nvm_command = shlex.join(["nvm"] + nvm_args)
+            nvshim_file.write(f"source {nvm_sh_path}\n{nvm_command}")
+        return process.run("bash", nvshim_file_path)
+    finally:
+        try:
+            os.remove(nvshim_file_path)
+        except Exception as e:
+            message.print_unable_to_remove_nvm_shim_temp_file(e)
 
 
 @functools.lru_cache(maxsize=None)
