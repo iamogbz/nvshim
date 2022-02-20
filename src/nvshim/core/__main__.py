@@ -49,9 +49,8 @@ def get_files(path: str) -> [str]:
 def run_nvm_cmd(
     nvm_sh_path: str, nvm_args: str, **kwargs: dict
 ) -> process.subprocess.CompletedProcess:
-    return process.run(
-        f". {nvm_sh_path} && nvm {nvm_args}", shell="bash", encoding="UTF-8", **kwargs
-    )
+    shell_cmd = f". {nvm_sh_path} && nvm {nvm_args}"
+    return process.run(shell_cmd, shell=True, encoding="UTF-8", **kwargs)
 
 
 @functools.lru_cache(maxsize=None)
