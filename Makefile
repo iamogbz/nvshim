@@ -86,7 +86,7 @@ sanities:
 
 .PHONY: sanity.check
 sanity.check:
-	env NVM_DIR=$(HOME)/.nvm $(exec) --version | grep -q '$(match)' && echo 'success' || exit 1
+	env NVM_DIR=$(HOME)/.nvm $(exec) --version | grep -q '$(version)' && echo 'success' || exit 1
 
 .PHONY: setup
 setup:
@@ -98,7 +98,7 @@ setup.sanity: setup
 	make sanity.check exec=$(VENV_BIN)node version="v14.5.0"
 	make sanity.check exec=$(VENV_BIN)npm version="6.14.5"
 	make sanity.check exec=$(VENV_BIN)npx version="6.14.5"
-	make sanity.check exec=$(VENV_BIN)nvm version="0.35.0"
+	make sanity.check exec=$(VENV_BIN)nvm version="0.34.0"
 	rm .nvmrc
 
 .PHONY: setup.debug
