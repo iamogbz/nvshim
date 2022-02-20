@@ -90,8 +90,3 @@ def print_process_interrupted(exc: KeyboardInterrupt):
 
 def print_unable_to_run(exc: CalledProcessError):
     _print(str(exc), level=MessageLevel.QUIET)
-
-
-def print_unable_to_remove_nvm_shim_temp_file(exc: Exception):
-    _print_error("Unable to remove temporary nvm shim file")
-    _print(str(exc), level=MessageLevel.QUIET)
