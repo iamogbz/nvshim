@@ -45,6 +45,7 @@ venv:
 install: venv
 	$(PIP_EXEC) install --upgrade pip
 	$(PIP_EXEC) install -Ur requirements.txt
+	$(PIP_EXEC) install .
 	$(PYTHON_EXEC) -m python_githooks
 
 .PHONY: clean

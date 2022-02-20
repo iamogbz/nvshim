@@ -2,7 +2,6 @@ import argparse
 import functools
 import os
 import re
-import shlex
 import subprocess
 import sys
 from typing import Callable, Dict, List, Sequence, Set, Union
@@ -53,8 +52,7 @@ def run_nvm_cmd(
     nvshim_file_path = f"{os.path.dirname(sys.argv[0])}/nvm_shim.sh.tmp"
     try:
         with open(nvshim_file_path, "w") as nvshim_file:
-            nvm_command = shlex.join(["nvm"] + nvm_args)
-            nvshim_file.write(f"source {nvm_sh_path}\n{nvm_command}")
+            nvshim_file.write(f"source {nvm_sh_path}\nnvm {nvm_args}")
         return process.run("bash", nvshim_file_path)
     finally:
         try:
