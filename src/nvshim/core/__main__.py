@@ -49,8 +49,16 @@ def get_files(path: str) -> [str]:
 def run_nvm_cmd(
     nvm_sh_path: str, nvm_args: str, **kwargs: dict
 ) -> process.subprocess.CompletedProcess:
-    shell_cmd = f". {nvm_sh_path} && nvm {nvm_args}"
-    return process.run(shell_cmd, shell=True, encoding="UTF-8", **kwargs)
+    nvshim_file_path = f"{os.path.dirname(sys.argv[0])}/nvm_shim.sh.tmp"
+    try:
+        with open(nvshim_file_path, "w") as nvshim_file:
+            nvshim_file.write(f"source {nvm_sh_path}\nnvm {nvm_args}")
+        return process.run("bash", nvshim_file_path)
+    finally:
+        try:
+            os.remove(nvshim_file_path)
+        except Exception as e:
+            message.print_unable_to_remove_nvm_shim_temp_file(e)
 
 
 @functools.lru_cache(maxsize=None)
