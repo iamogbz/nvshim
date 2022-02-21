@@ -86,7 +86,7 @@ sanities:
 
 .PHONY: sanity.check
 sanity.check:
-	env NVM_DIR=$(HOME)/.nvm $(exec) --version | grep -q '$(version)' && echo 'success' || exit 1
+	(env NVM_DIR=$(HOME)/.nvm $(exec) --version | tail -n +1 | grep -q '$(version)' && echo 'success') || exit 1
 
 .PHONY: setup
 setup:
