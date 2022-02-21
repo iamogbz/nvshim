@@ -4,8 +4,9 @@ import subprocess
 import sys
 from typing import Dict
 
+from .constants import ErrorCode
 from .environment import EnvironmentVariable, EnvDict, process_env
-from .message import print_unable_to_run
+from .message import print_process_interrupted, print_unable_to_run
 
 
 def _include_venv(env: EnvDict):
