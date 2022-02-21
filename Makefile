@@ -4,7 +4,7 @@ WITH_ENV = env $(ENVARS)
 
 VENV_BIN = venv/bin/
 PYTHON_EXEC = $(WITH_ENV) $(VENV_BIN)python
-PYTHON_MODULE = $(PYTHON_EXEC) -m 
+PYTHON_MODULE = $(PYTHON_EXEC) -m
 PIP_EXEC = $(PYTHON_MODULE) pip
 PYTEST_EXEC = $(PYTHON_MODULE) pytest -v
 COVERAGE_EXEC = $(PYTHON_MODULE) coverage
@@ -85,7 +85,7 @@ sanities:
 
 .PHONY: sanity.check
 sanity.check:
-	env NVM_DIR=$(HOME)/.nvm $(exec) --version | grep -q '$(match)' && echo 'success' || exit 1
+	(env NVM_DIR=$(HOME)/.nvm $(exec) --version | tail -n +1 | grep -q '$(version)' && echo 'success') || exit 1
 
 .PHONY: setup
 setup:
