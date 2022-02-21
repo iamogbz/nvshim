@@ -6,7 +6,8 @@ import nvshim.core.__main__ as core
 
 
 def main():
-    core.run_nvm_cmd(core.get_nvmsh_path(core.get_nvm_dir()), shlex.join(sys.argv[1:]))
+    nvm_args = " ".join(shlex.quote(arg) for arg in sys.argv[1:])
+    core.run_nvm_cmd(core.get_nvmsh_path(core.get_nvm_dir()), nvm_args)
 
 
 if __name__ == "__main__":
