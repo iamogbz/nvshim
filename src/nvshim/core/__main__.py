@@ -53,7 +53,7 @@ def run_nvm_cmd(
     try:
         with open(nvshim_file_path, "w") as nvshim_file:
             nvshim_file.write(f"source {nvm_sh_path}\nnvm {nvm_args}")
-        return process.run("bash", nvshim_file_path)
+        return process.run("bash", nvshim_file_path, **kwargs)
     finally:
         try:
             os.remove(nvshim_file_path)
