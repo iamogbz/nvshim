@@ -1,32 +1,32 @@
+"""Setup project file"""
+import os
 import sys
 from datetime import datetime
+from typing import List, Sequence
+from setuptools import setup
 
 sys.path.append("src")
-
-import os
-from setuptools import setup
-from typing import Sequence
 
 from nvshim.utils.constants import shims
 
 
 def readme() -> str:
-    with open("README.md") as f:
-        return f.read()
+    """Get all lines from read me file"""
+    return "\n".join(lines("README.md"))
 
 
 def lines(filepath) -> Sequence[str]:
     """Lines of a file generator"""
-    with open(filepath) as f:
+    with open(filepath, encoding="UTF-8") as open_file:
         while True:
-            line = f.readline().strip()
+            line = open_file.readline().strip()
             if line:
                 yield line
             else:
                 return
 
 
-def get_requirements(filepath: str, visited: [str]) -> [str]:
+def get_requirements(filepath: str, visited: List[str]) -> List[str]:
     """
     Get all pip requirements specified by a requirements file
     with support for nested requirements files
@@ -62,14 +62,15 @@ def get_requirements(filepath: str, visited: [str]) -> [str]:
     return list(requirements)
 
 
-def version_scheme(version):
+def version_scheme(version) -> str:
+    """Convert version to version string"""
+    print(type(version), version.__dict__)
     if version.exact:
         return version.format_with("{tag}")
-    else:
-        return datetime.now().strftime("%Y.%m.%d.%H%M%S%f")
+    return datetime.now().strftime("%Y.%m.%d.%H%M%S%f")
 
 
-console_scripts = [f"nvm=nvshim.core.shim_nvm:main"] + [
+console_scripts = ["nvm=nvshim.core.shim_nvm:main"] + [
     f"{s}=nvshim.core.shim:main" for s in shims
 ]
 
@@ -105,7 +106,7 @@ setup(
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",
     use_scm_version={
-        "local_scheme": lambda _: "",
+        "local_scheme": "no-local-version",
         "version_scheme": version_scheme,
         "write_to": "./src/nvshim/__init__.py",
         "write_to_template": '__version__ = "{version}"\n',
