@@ -1,25 +1,25 @@
-import os
+"""Release to pypi deploy logic"""
 import importlib
+import os
 
 import semver
 
 import nvshim
 from nvshim.utils import process
 
-
-dist_path = "dist"
+DIST_PATH = "dist"
 
 
 def _is_valid_release_version(version: str) -> bool:
     try:
-        return semver.VersionInfo.parse(version)
-    except:
-        pass
+        return bool(semver.VersionInfo.parse(version))
+    except ValueError:
+        return False
 
 
 def _clean():
     print("Cleaning...")
-    process.run("rm", "-rf", dist_path)
+    process.run("rm", "-rf", DIST_PATH)
 
 
 def _build():
@@ -31,7 +31,7 @@ def _get_publish_command(*, dry_run: bool = True):
     cmd = ["twine", "upload", "--skip-existing"]
     if dry_run:
         cmd.extend(["--repository-url", "https://test.pypi.org/legacy/"])
-    cmd.append(os.path.join(dist_path, "*"))
+    cmd.append(os.path.join(DIST_PATH, "*"))
     return cmd
 
 
@@ -43,6 +43,7 @@ def _publish(*, dry_run: bool = True):
 
 
 def main():
+    """Run main release logic"""
     _clean()
     _build()
 
@@ -58,6 +59,8 @@ def main():
         _publish(dry_run=False)
     else:
         return print("No release version")
+
+    return None
 
 
 if __name__ == "__main__":

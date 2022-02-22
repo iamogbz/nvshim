@@ -1,12 +1,12 @@
+"""Shim node binaries for running node commands"""
 import os
 import sys
 
 import nvshim.core.__main__ as core
-from nvshim.utils.constants import ErrorCode
-from nvshim.utils.message import print_process_interrupted
 
 
 def main():
+    """Pipe arguments to run specific node binary"""
     sys.argv.insert(1, os.path.basename(sys.argv[0]))
     core.main()
 

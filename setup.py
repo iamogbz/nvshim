@@ -1,13 +1,15 @@
 """Setup project file"""
 import os
-import sys
 from datetime import datetime
-from typing import List, Sequence
+from typing import (
+    Iterator,
+    List,
+    Set,
+)
+
 from setuptools import setup
 
-sys.path.append("src")
-
-from nvshim.utils.constants import shims
+from src.nvshim.utils.constants import shims
 
 
 def readme() -> str:
@@ -15,7 +17,7 @@ def readme() -> str:
     return "\n".join(lines("README.md"))
 
 
-def lines(filepath) -> Sequence[str]:
+def lines(filepath) -> Iterator[str]:
     """Lines of a file generator"""
     with open(filepath, encoding="UTF-8") as open_file:
         while True:
@@ -35,7 +37,7 @@ def get_requirements(filepath: str, visited: List[str]) -> List[str]:
     :param visited: mutable list of visited requirements.txt files
     :return: unordered list of requirements without versions
     """
-    requirements = set()
+    requirements: Set[str] = set()
     filepath = os.path.realpath(filepath)
     rel_filepath = os.path.relpath(filepath)
 
@@ -64,7 +66,6 @@ def get_requirements(filepath: str, visited: List[str]) -> List[str]:
 
 def version_scheme(version) -> str:
     """Convert version to version string"""
-    print(type(version), version.__dict__)
     if version.exact:
         return version.format_with("{tag}")
     return datetime.now().strftime("%Y.%m.%d.%H%M%S%f")
@@ -109,6 +110,6 @@ setup(
         "local_scheme": "no-local-version",
         "version_scheme": version_scheme,
         "write_to": "./src/nvshim/__init__.py",
-        "write_to_template": '__version__ = "{version}"\n',
+        "write_to_template": '"""Current package version"""\n__version__ = "{version}"\n',
     },
 )

@@ -3,7 +3,9 @@
 black
 coverage==5.1
 coveralls==3.3.1
+mypy
 pylint
+pylint-pytest
 py-githooks
 rope
 twine
