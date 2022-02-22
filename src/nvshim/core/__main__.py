@@ -1,40 +1,66 @@
+"""Main shim logic"""
 import argparse
 import functools
 import os
 import re
 import subprocess
 import sys
-from typing import Callable, Dict, List, Sequence, Set, Union
+from typing import (
+    Callable,
+    Dict,
+    Hashable,
+    Iterator,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import semver
 
 from nvshim import __version__
-from nvshim.utils import environment, message, process
+from nvshim.utils import (
+    environment,
+    message,
+    process,
+)
 from nvshim.utils.constants import ErrorCode
 
-
-AliasResolver = Callable[..., str]
-AliasOrResolver = Union[str, AliasResolver]
-AliasMapping = Dict[str, AliasOrResolver]
-VersionMapping = Dict[str, str]
+KeyType = TypeVar("KeyType")
+ValueType = TypeVar("ValueType")
 
 
-class HashableList(list):
+class HashableList(List[ValueType], Hashable):
+    """List that can be stored in a hash object"""
+
     def __hash__(self):
         return hash(frozenset(self))
 
 
-class HashableSet(set):
+class HashableSet(Set[ValueType], Hashable):
+    """Set that can be stored in a hash object"""
+
     def __hash__(self):
         return hash(frozenset(self))
 
 
-class HashableDict(dict):
+class HashableDict(Dict[KeyType, ValueType], Hashable):
+    """Dictionary that can be stored in a hash object"""
+
     def __hash__(self):
         return hash(frozenset(self.items()))
 
 
-def get_files(path: str) -> [str]:
+AliasResolver = Callable[..., Optional[str]]
+AliasOrResolver = Union[str, AliasResolver]
+VersionMapping = HashableDict[str, str]
+AliasMapping = Union[HashableDict[str, AliasOrResolver], VersionMapping]
+
+
+def get_files(path: str) -> Iterator[str]:
     """
     Generate the file paths to traverse, or a single path if a file name was given
     """
@@ -47,22 +73,35 @@ def get_files(path: str) -> [str]:
 
 
 def run_nvm_cmd(
-    nvm_sh_path: str, nvm_args: str, **kwargs: dict
+    nvm_sh_path: str, nvm_args: str, **kwargs
 ) -> process.subprocess.CompletedProcess:
+    """
+    Run nvm command by creating temp file that sources nvm.sh and runs command
+
+    :param nvm_sh_path: path to .nvm/nvm.sh file
+    :param nvm_args: arguments to pass to loaded nvm command
+    :return: completed process object
+    """
     nvshim_file_path = f"{os.path.dirname(sys.argv[0])}/nvm_shim.sh.tmp"
     try:
-        with open(nvshim_file_path, "w") as nvshim_file:
+        with open(nvshim_file_path, "w", encoding="UTF-8") as nvshim_file:
             nvshim_file.write(f"source {nvm_sh_path}\nnvm {nvm_args}")
         return process.run("bash", nvshim_file_path, **kwargs)
     finally:
         try:
             os.remove(nvshim_file_path)
-        except Exception as e:
-            message.print_unable_to_remove_nvm_shim_temp_file(e)
+        except OSError as exc:
+            message.print_unable_to_remove_nvm_shim_temp_file(exc)
 
 
 @functools.lru_cache(maxsize=None)
-def get_nvm_stable_version(nvm_dir) -> str:
+def get_nvm_stable_version(nvm_dir: str) -> Optional[str]:
+    """
+    Get the stable version by using nvm
+
+    :param nvm_dir: the path to .nvm installation
+    :return: the stable version number
+    """
     output = run_nvm_cmd(
         get_nvmsh_path(nvm_dir), "alias stable", stdout=subprocess.PIPE
     ).stdout
@@ -70,26 +109,45 @@ def get_nvm_stable_version(nvm_dir) -> str:
         return re.findall(r"> v([\w\.]+)", process.clean_output(output))[0]
     except (IndexError, KeyError) as exc:
         message.print_unable_to_get_stable_version(exc)
+        return None
 
 
 def get_nvm_aliases_dir(nvm_dir: str) -> str:
+    """
+    Get the folder location of .nvm aliases
+
+    :param nvm_dir: the path to .nvm installation
+    :return: nvm directory + alias
+    """
     return os.path.join(nvm_dir, "alias")
 
 
 def get_nvm_aliases(nvm_dir: str) -> AliasMapping:
-    aliases_to_version = HashableDict(
+    """
+    Get all nvm aliases
+
+    :param nvm_dir: the path to .nvm installation
+    :return: mapping of alias to version or laxy function that returns version
+    """
+    aliases_to_version: AliasMapping = HashableDict[str, AliasOrResolver](
         default="stable", node="stable", stable=lambda: get_nvm_stable_version(nvm_dir)
     )
     nvm_aliases_dir = get_nvm_aliases_dir(nvm_dir)
     for file_path in get_files(nvm_aliases_dir):
         rel_path = os.path.relpath(file_path, nvm_aliases_dir)
-        with open(file_path) as f:
-            aliases_to_version[rel_path] = f.readline().strip()
+        with open(file_path, encoding="UTF-8") as open_file:
+            aliases_to_version[rel_path] = open_file.readline().strip()
 
     return aliases_to_version
 
 
-def parse_version(version: str) -> semver.VersionInfo:
+def parse_version(version: Optional[str]) -> Optional[semver.VersionInfo]:
+    """
+    Extract semantic version info object from version string
+
+    :param version: version string in various formats e.g. v0.1, 1.0.1 etc.
+    :return: parsed semantic version info or None when version cannot be parsed
+    """
     if not version:
         return None
     try:
@@ -104,9 +162,9 @@ def parse_version(version: str) -> semver.VersionInfo:
 def resolve_alias(
     var: AliasOrResolver,
     alias_mapping: AliasMapping,
-    seen: Set[str] = HashableSet(),
-    seen_order: List[str] = HashableList(),
-) -> (semver.VersionInfo, str, [str]):
+    seen: HashableSet[str] = HashableSet(),
+    seen_order: HashableList[str] = HashableList(),
+) -> Tuple[Optional[semver.VersionInfo], Optional[str], HashableList[str]]:
     """
     Resolve an alias to a semantic version going through multiple mappings
 
@@ -115,7 +173,7 @@ def resolve_alias(
     :return: (semantic version info, alias name, list of aliases traversed)
     """
     alias = var() if callable(var) else var
-    if alias in alias_mapping and alias not in seen:
+    if alias and alias in alias_mapping and alias not in seen:
         seen_order.append(alias)
         seen.add(alias)
         return resolve_alias(alias_mapping.get(alias), alias_mapping, seen, seen_order)
@@ -124,15 +182,16 @@ def resolve_alias(
 
 
 @functools.lru_cache(maxsize=None)
-def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> AliasMapping:
+def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> HashableDict[str, str]:
     """
     Resolve all aliases in a mapping to their version info
     """
-    resolved_aliases = {}
+    resolved_aliases = HashableDict[str, str]()
     for alias, version in nvm_aliases.items():
+        version_info = parse_version(version) if isinstance(version, str) else None
         version_info = (
-            isinstance(version, str) and parse_version(version)
-        ) or resolve_alias(version, nvm_aliases)[0]
+            version_info if version_info else resolve_alias(version, nvm_aliases)[0]
+        )
 
         if version_info:
             resolved_aliases[alias] = str(version_info)
@@ -141,33 +200,67 @@ def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> AliasMapping:
 
 
 def get_node_versions_dir(nvm_dir: str) -> str:
+    """
+    Get the folder location of nvm install node binaries
+
+    :param nvm_dir: the path to .nvm installation
+    :return: folder path string
+    """
     return os.path.join(nvm_dir, "versions", "node")
 
 
 def get_node_version_bin_dir(node_versions_dir: str, version: str) -> str:
+    """
+    Get the folder location of the binaries for the specfic version of node managed by .nvm
+
+    :param node_versions_dir: the path of .nvm node installations
+    :param version: resolved version string without the leading 'v' e.g. 1.1.1, 0.1.1
+    :return: the folder path string of nvm managed node version installed binaries
+    """
     return os.path.join(node_versions_dir, f"v{version}", "bin")
 
 
 def get_node_versions(node_versions_dir: str) -> VersionMapping:
+    """
+    Get a mapping of nvm manager node versions to their bin install folder path
+
+    :param node_versions_dir: the path of .nvm node installations
+    :return: mapping of parsed versions in the node versions folder to node version bin folder path
+    """
     files = os.listdir(node_versions_dir) if os.path.exists(node_versions_dir) else []
-    return {
-        str(v): get_node_version_bin_dir(node_versions_dir, str(v))
-        for v in map(parse_version, files)
-    }
+    return HashableDict(
+        {
+            str(v): get_node_version_bin_dir(node_versions_dir, str(v))
+            for v in map(parse_version, files)
+        }
+    )
 
 
 def merge_nvm_aliases_with_node_versions(
     nvm_aliases: AliasMapping, node_versions: VersionMapping
 ) -> VersionMapping:
+    """
+    Merge nvm aliases with node versions for aliases that resolved to detected node versions
+
+    :param nvm_aliases: resolved nvm aliases
+    :param node_versions: parsed node versions to bin folder path
+    :return: all aliases and versions to bin folder path
+    """
     alias_versions = {
-        alias: node_versions[version]
+        alias: node_versions[str(version)]
         for alias, version in nvm_aliases.items()
         if version in node_versions
     }
-    return {**alias_versions, **node_versions}
+    return HashableDict({**alias_versions, **node_versions})
 
 
-def get_nvmrc_path(exec_dir: str) -> str:
+def get_nvmrc_path(exec_dir: str) -> Optional[str]:
+    """
+    Get the path to the nearest .nvmrc file from the current folder by traversing up the tree
+
+    :param exec_dir: the folder to start search from
+    :return: path to first found .nvmrc file
+    """
     root_dir = os.path.abspath(os.sep)
     current_dir = exec_dir
     config_file = ".nvmrc"
@@ -182,11 +275,17 @@ def get_nvmrc_path(exec_dir: str) -> str:
     return current_config if config_found else None
 
 
-def get_nvmrc(nvmrc_path: str = None) -> (str, bool):
+def get_nvmrc(nvmrc_path: str = None) -> Tuple[str, bool]:
+    """
+    Get the version from the nvmrc file, falling back to default when none found
+
+    :param nvmrc_path: the location of the .nvmrc file, defaults to None
+    :return: .nvmrc version and bool indicating if it was found or using fallback
+    """
     version = "default"
     if nvmrc_path:
-        with open(nvmrc_path) as f:
-            rc_version = f.readline().strip()
+        with open(nvmrc_path, encoding="UTF-8") as open_file:
+            rc_version = open_file.readline().strip()
             parsed_version = parse_version(rc_version)
             if parsed_version:
                 return str(parsed_version), True
@@ -196,10 +295,23 @@ def get_nvmrc(nvmrc_path: str = None) -> (str, bool):
 
 
 def get_nvmsh_path(nvm_dir: str) -> str:
+    """
+    Get path to .nvm/nvm.sh file using
+
+    :param nvm_dir: the path to .nvm installation
+    :return: {nvm_dir}/.nvmsh
+    """
     return os.path.join(nvm_dir, "nvm.sh")
 
 
 def _pretty_version(version: str, parsed: bool) -> str:
+    """
+    Get the version string for printing logs of what version was found
+
+    :param version: version string
+    :param parsed: if the version was semantic compatible or not
+    :return: version string with 'v' prefixed if parsed otherwise pass through
+    """
     return f"v{version}" if parsed else version
 
 
@@ -213,9 +325,33 @@ def get_bin_path(
     node_versions_dir: str,
     nvm_sh_path: str,
 ):
-    if version not in node_versions and nvm_aliases.get(version) not in node_versions:
-        nvm_aliases = resolve_nvm_aliases(nvm_aliases)
-    version_mapping = merge_nvm_aliases_with_node_versions(nvm_aliases, node_versions)
+    """
+    Get path of the node executable for the version/alias given
+
+    :param version: version or alias
+    :param is_version_parsed: if the version was semantically parseable
+    :param nvm_aliases: nvm aliases to version mapping
+    :param node_versions: node versions to bin folder mapping
+    :param bin_file: the node binary to find
+    :param node_versions_dir: the path of .nvm node installations
+    :param nvm_sh_path: path to .nvm/nvm.sh file
+    :return: path to the bin_file in the node version installation
+    """
+    resolved_nvm_aliases = (
+        resolve_nvm_aliases(nvm_aliases)
+        if version not in node_versions
+        and nvm_aliases.get(version) not in node_versions
+        else HashableDict(
+            {
+                k: k if k in node_versions else v
+                for k, v in nvm_aliases.items()
+                if isinstance(v, str)
+            }
+        )
+    )
+    version_mapping = merge_nvm_aliases_with_node_versions(
+        resolved_nvm_aliases, node_versions
+    )
     try:
         node_path = version_mapping[version]
     except KeyError:
@@ -227,7 +363,7 @@ def get_bin_path(
 
         run_nvm_cmd(nvm_sh_path, f"install {version}")
         node_path = get_node_version_bin_dir(
-            node_versions_dir, version=nvm_aliases.get(version, version)
+            node_versions_dir, version=resolved_nvm_aliases.get(version, version)
         )
 
     bin_path = os.path.join(node_path, bin_file)
@@ -238,7 +374,7 @@ def get_bin_path(
     return bin_path
 
 
-def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
+def parse_args(args: Sequence[str]) -> Tuple[argparse.Namespace, List[str]]:
     """
     Get the arguments to be used to execute the node binary
     :return: parsed and unknown arguments
@@ -263,7 +399,12 @@ def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
     return parser.parse_known_args(args)
 
 
-def get_nvm_dir():
+def get_nvm_dir() -> str:
+    """
+    Get nvm dir from environment or fail if the variable is not set
+
+    :return: $NVM_DIR
+    """
     try:
         return environment.get_nvm_dir()
     except environment.MissingEnvironmentVariableError as error:
@@ -272,6 +413,11 @@ def get_nvm_dir():
 
 
 def main(version_number: str = __version__):
+    """
+    Run the main shim logic
+
+    :param version_number: the current nvshim version, defaults to __version__
+    """
     message.print_running_version(version_number)
     parsed_args, unknown_args = parse_args(sys.argv[1:])
     nvmrc_path = get_nvmrc_path(os.getcwd())

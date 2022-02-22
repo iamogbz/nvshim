@@ -1,15 +1,22 @@
+"""Test process util functions"""
 import subprocess
+
 import pytest
 
-from nvshim.utils import constants, process
+from nvshim.utils import (
+    constants,
+    process,
+)
 
 
 def test_process_run_completes_successfully():
+    """Test run pipes results successfully"""
     output = process.run("echo", "success", stdout=subprocess.PIPE).stdout.strip()
     assert output == "success"
 
 
 def test_process_run_handles_exception_system_exit():
+    """Test run handles system exit with correct error code"""
     with pytest.raises(SystemExit) as exc_info:
         process.run("bash", "-c", "exit 1")
 
@@ -17,6 +24,7 @@ def test_process_run_handles_exception_system_exit():
 
 
 def test_process_run_handles_exception_interrupt(mocker, capsys, snapshot):
+    """Test run handles keyboard interrupt with correct error code"""
     mocked_process_run = mocker.patch(
         "subprocess.run",
         autospec=True,

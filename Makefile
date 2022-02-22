@@ -10,6 +10,9 @@ PYTEST_EXEC = $(PYTHON_MODULE) pytest -v
 COVERAGE_EXEC = $(PYTHON_MODULE) coverage
 COVERALLS_EXEC = $(PYTHON_MODULE) coveralls
 BLACK_EXEC = $(PYTHON_MODULE) black
+ISORT_EXEC = $(PYTHON_MODULE) isort
+LINT_EXEC = $(PYTHON_MODULE) pylint
+MYPY_EXEC = $(PYTHON_MODULE) mypy
 
 PYTHON_SETUP = $(PYTHON_EXEC) setup.py install
 
@@ -57,7 +60,7 @@ clean:
 
 .PHONY: tests
 tests:
-	$(PYTEST_EXEC)
+	$(PYTEST_EXEC) -vv
 
 .PHONY: test
 test:
@@ -107,10 +110,14 @@ setup.debug: clean
 
 .PHONY: lint
 lint:
+	$(ISORT_EXEC) . --check
 	$(BLACK_EXEC) . --check
+	${LINT_EXEC} src *.py
+	$(MYPY_EXEC) src *.py
 
 .PHONY: format
 format:
+	$(ISORT_EXEC) .
 	$(BLACK_EXEC) .
 
 .PHONY: deploy

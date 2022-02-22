@@ -1,10 +1,10 @@
-# name: TestMain.test_fails_when_nvm_dir_not_available
+# name: test_fails_when_nvm_dir_not_available
   '
   Executing shim version 0.0.0
   Environment variable 'NVM_DIR' missing
   '
 ---
-# name: TestMain.test_fails_when_version_not_installed
+# name: test_fails_when_version_not_installed
   '
   Executing shim version 0.0.0
   N/A version 'v14.5.0' is not yet installed.
@@ -14,7 +14,7 @@
   Or set the environment variable 'NVSHIM_AUTO_INSTALL' to auto install at run time.
   '
 ---
-# name: TestParseArgs.test_accepts_any_arg_for_bin_file
+# name: test_accepts_any_arg_for_bin_file
   <class 'tuple'> (
     Namespace(bin_args=[], bin_file='npm'),
     <class 'list'> [
@@ -23,7 +23,7 @@
     ],
   )
 ---
-# name: TestParseArgs.test_accepts_bin_file_arg
+# name: test_accepts_bin_file_arg
   <class 'tuple'> (
     Namespace(bin_args=[], bin_file='node'),
     <class 'list'> [

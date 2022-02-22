@@ -16,3 +16,41 @@ exclude = '''
   | dist
 )
 '''
+
+[tool.isort]
+force_grid_wrap = 2
+known_first_party = 'nvshim'
+profile = 'black'
+skip = '''
+.eggs,
+.mypy_cache,
+.venv,
+venv,
+build,
+dist,
+'''
+
+[tool.pylint.MASTER]
+ignore-paths = [
+  '^stubs/.*$'
+]
+load-plugins = [
+  'pylint_pytest'
+]
+max-args=6
+
+[tool.mypy]
+mypy_path = 'stubs'
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = [
+  './src',
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  'pragma: no-cover',
+  'if TYPE_CHECKING:',
+  '@abstractmethod',
+]
