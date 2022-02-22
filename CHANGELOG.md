@@ -12,6 +12,13 @@ See open [issues](https://github.com/iamogbz/nvshim/issues)
 
 See closed [issues](https://github.com/iamogbz/nvshim/pulls?q=is%3Apr+is%3Amerged+sort%3Acreated-desc+-label%3Areleased)
 
+# [1.1.0](https://github.com/iamogbz/nvshim/compare/v1.0.5...v1.1.0) (2022-02-22)
+
+
+### Features
+
+* add nvm shim for running nvm commands ([#168](https://github.com/iamogbz/nvshim/issues/168)) ([4015efd](https://github.com/iamogbz/nvshim/commit/4015efdda7ee00c70ad47b8b58ebfe251f7ed981))
+
 ## [1.0.5](https://github.com/iamogbz/nvshim/compare/v1.0.4...v1.0.5) (2020-04-07)
 
 
