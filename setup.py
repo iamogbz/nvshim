@@ -69,6 +69,10 @@ def version_scheme(version):
         return datetime.now().strftime("%Y.%m.%d.%H%M%S%f")
 
 
+console_scripts = [f"nvm=nvshim.core.shim_nvm:main"] + [
+    f"{s}=nvshim.core.shim:main" for s in shims
+]
+
 setup(
     author="Emmanuel Ogbizi-Ugbe",
     author_email="iamogbz+pypi@gmail.com",
@@ -86,7 +90,7 @@ setup(
         "Topic :: Software Development",
     ],
     description="Automagically use the correct version of node",
-    entry_points={"console_scripts": [f"{s}=nvshim.core.shim:main" for s in shims]},
+    entry_points={"console_scripts": console_scripts},
     include_package_data=True,
     install_requires=get_requirements("requirements/prod.txt", []),
     keywords="node nvm node-shim shim shell nvm-shim",

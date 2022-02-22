@@ -46,17 +46,24 @@ def get_files(path: str) -> [str]:
         yield path
 
 
-def _run_nvm_cmd(
+def run_nvm_cmd(
     nvm_sh_path: str, nvm_args: str, **kwargs: dict
 ) -> process.subprocess.CompletedProcess:
-    return process.run(
-        f". {nvm_sh_path} && nvm {nvm_args}", shell="bash", encoding="UTF-8", **kwargs
-    )
+    nvshim_file_path = f"{os.path.dirname(sys.argv[0])}/nvm_shim.sh.tmp"
+    try:
+        with open(nvshim_file_path, "w") as nvshim_file:
+            nvshim_file.write(f"source {nvm_sh_path}\nnvm {nvm_args}")
+        return process.run("bash", nvshim_file_path, **kwargs)
+    finally:
+        try:
+            os.remove(nvshim_file_path)
+        except Exception as e:
+            message.print_unable_to_remove_nvm_shim_temp_file(e)
 
 
 @functools.lru_cache(maxsize=None)
 def get_nvm_stable_version(nvm_dir) -> str:
-    output = _run_nvm_cmd(
+    output = run_nvm_cmd(
         get_nvmsh_path(nvm_dir), "alias stable", stdout=subprocess.PIPE
     ).stdout
     try:
@@ -218,7 +225,7 @@ def get_bin_path(
             )
             sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
 
-        _run_nvm_cmd(nvm_sh_path, f"install {version}")
+        run_nvm_cmd(nvm_sh_path, f"install {version}")
         node_path = get_node_version_bin_dir(
             node_versions_dir, version=nvm_aliases.get(version, version)
         )
@@ -256,16 +263,20 @@ def parse_args(args: Sequence[str]) -> (argparse.Namespace, List[str]):
     return parser.parse_known_args(args)
 
 
+def get_nvm_dir():
+    try:
+        return environment.get_nvm_dir()
+    except environment.MissingEnvironmentVariableError as error:
+        message.print_env_var_missing(error.env_var)
+        sys.exit(ErrorCode.ENV_NVM_DIR_MISSING)
+
+
 def main(version_number: str = __version__):
     message.print_running_version(version_number)
     parsed_args, unknown_args = parse_args(sys.argv[1:])
     nvmrc_path = get_nvmrc_path(os.getcwd())
     version, parsed = get_nvmrc(nvmrc_path)
-    try:
-        nvm_dir = environment.get_nvm_dir()
-    except environment.MissingEnvironmentVariableError as error:
-        message.print_env_var_missing(error.env_var)
-        sys.exit(ErrorCode.ENV_NVM_DIR_MISSING)
+    nvm_dir = get_nvm_dir()
 
     bin_path = get_bin_path(
         version=version,

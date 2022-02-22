@@ -1,0 +1,3 @@
+# name: test_process_run_handles_exception_interrupt
+  'Interrupted. Ctrl+C'
+---

@@ -45,6 +45,7 @@ venv:
 install: venv
 	$(PIP_EXEC) install --upgrade pip
 	$(PIP_EXEC) install -Ur requirements.txt
+	$(PIP_EXEC) install .
 	$(PYTHON_EXEC) -m python_githooks
 
 .PHONY: clean
@@ -97,6 +98,7 @@ setup.sanity: setup
 	make sanity.check exec=$(VENV_BIN)node version="v14.5.0"
 	make sanity.check exec=$(VENV_BIN)npm version="6.14.5"
 	make sanity.check exec=$(VENV_BIN)npx version="6.14.5"
+	make sanity.check exec=$(VENV_BIN)nvm version="0.34.0"
 	rm .nvmrc
 
 .PHONY: setup.debug

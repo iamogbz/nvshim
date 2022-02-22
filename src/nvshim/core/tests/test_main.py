@@ -98,7 +98,9 @@ class TestMain:
             main()
 
         mocked_process_run.assert_called_with(
-            (f"{node_version_dir}/bin/{test_args[1]}", *test_args[2:]), check=True
+            (f"{node_version_dir}/bin/{test_args[1]}", *test_args[2:]),
+            check=True,
+            encoding="UTF-8",
         )
         captured = capsys.readouterr()
         assert "with version <v14.5.0>" in clean_output(captured.out)

@@ -7,12 +7,8 @@ from nvshim.utils.message import print_process_interrupted
 
 
 def main():
-    try:
-        sys.argv.insert(1, os.path.basename(sys.argv[0]))
-        core.main()
-    except KeyboardInterrupt as e:
-        print_process_interrupted(e)
-        sys.exit(ErrorCode.KEYBOARD_INTERRUPT)
+    sys.argv.insert(1, os.path.basename(sys.argv[0]))
+    core.main()
 
 
 if __name__ == "__main__":
