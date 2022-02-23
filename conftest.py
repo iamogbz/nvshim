@@ -10,7 +10,8 @@ from typing import (
 import pytest
 
 __TEST_DIR__ = os.path.join(os.environ["PWD"], "tmp")
-__TEST_DIR_STRUCTURE__: Dict[str, Union[str, dict]] = {".nvmrc": "v14.5.0"}
+__TEST_VERSION__ = "v14.5.0"
+__TEST_DIR_STRUCTURE__: Dict[str, Union[str, dict]] = {".nvmrc": __TEST_VERSION__}
 __NVM_DIR__ = os.path.join(os.path.expanduser("~"), ".nvm")
 
 
@@ -64,7 +65,7 @@ def test_workspace():
 def test_node_version_dir():
     """Ensure node version used for testing does not exist before running tests"""
     nvm_dir = os.environ.get("NVM_DIR") or __NVM_DIR__
-    version_path = os.path.join(nvm_dir, "versions", "node", "v14.5.0")
+    version_path = os.path.join(nvm_dir, "versions", "node", __TEST_VERSION__)
     shutil.rmtree(version_path, ignore_errors=True)
     return __NVM_DIR__, version_path
 
