@@ -44,10 +44,10 @@ def test_fails_when_nvm_dir_not_available(capsys, snapshot):
     ) as exc_info:
         main()
 
-    assert exc_info.value.code == 1003
     captured = capsys.readouterr()
     snapshot.assert_match(clean_output(captured.out))
     assert not captured.err
+    assert exc_info.value.code == 1003
 
 
 def test_fails_when_version_not_installed(
@@ -73,10 +73,10 @@ def test_fails_when_version_not_installed(
     with process_env(mock_env), pytest.raises(SystemExit) as exc_info:
         main()
 
-    assert exc_info.value.code == 1001
     captured = capsys.readouterr()
     snapshot.assert_match(clean_output(captured.out))
     assert not captured.err
+    assert exc_info.value.code == 1001
 
 
 def test_fails_when_node_binary_not_found_in_install_path(
@@ -110,9 +110,9 @@ def test_fails_when_node_binary_not_found_in_install_path(
     with process_env(mock_env), pytest.raises(SystemExit) as exc_info:
         main()
 
-    assert exc_info.value.code == 1002
     captured = capsys.readouterr()
     assert "No executable file found at" in clean_output(captured.out)
+    assert exc_info.value.code == 1002
 
 
 def test_runs_correct_version_of_node(
