@@ -2,6 +2,7 @@
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -64,6 +65,10 @@ def test_fails_when_version_not_installed(
         autospec=True,
         return_value=test_nested_workspace_with_nvmrc,
     )
+    with open(
+        f"{test_nested_workspace_with_nvmrc}/.nvmrc", "w", encoding="UTF-8"
+    ) as nvmrc_file:
+        nvmrc_file.write("12.22.1")
     mock_env = {
         EnvironmentVariable.NVM_DIR.value: nvm_dir,
         **os.environ,
@@ -97,7 +102,7 @@ def test_fails_when_node_binary_not_found_in_install_path(
 
     mocker.patch(
         "nvshim.core.__main__.os.path.exists",
-        side_effect=lambda path: os.path.isfile(path)
+        side_effect=lambda path: Path(path).exists()
         if path != expected_node_bin_path
         else False,
     )
