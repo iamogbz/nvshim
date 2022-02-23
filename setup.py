@@ -21,9 +21,9 @@ def lines(filepath) -> Iterator[str]:
     """Lines of a file generator"""
     with open(filepath, encoding="UTF-8") as open_file:
         while True:
-            line = open_file.readline().strip()
+            line = open_file.readline()
             if line:
-                yield line
+                yield line.strip()
             else:
                 return
 
