@@ -12,6 +12,13 @@ See open [issues](https://github.com/iamogbz/nvshim/issues)
 
 See closed [issues](https://github.com/iamogbz/nvshim/pulls?q=is%3Apr+is%3Amerged+sort%3Acreated-desc+-label%3Areleased)
 
+## [1.1.1](https://github.com/iamogbz/nvshim/compare/v1.1.0...v1.1.1) (2022-02-23)
+
+
+### Bug Fixes
+
+* using version message bin path ([848ad42](https://github.com/iamogbz/nvshim/commit/848ad42fe757406b0f548914993e50c263b1500f))
+
 # [1.1.0](https://github.com/iamogbz/nvshim/compare/v1.0.5...v1.1.0) (2022-02-22)
 
 
