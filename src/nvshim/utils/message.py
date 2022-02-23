@@ -67,7 +67,7 @@ def print_using_version(version: str, bin_path: str, nvmrc_path: str = None):
         f"Found '{nvmrc_path}' with version <{version}>"
         if nvmrc_path
         else f"Using <{version}> version",
-        f"\n.{bin_path}\n",
+        f"\n{bin_path}\n",
     )
     _print("".join(messages), level=MessageLevel.QUIET)
 
