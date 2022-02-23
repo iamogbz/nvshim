@@ -37,7 +37,7 @@ ignore-paths = [
 load-plugins = [
   'pylint_pytest'
 ]
-max-args=6
+max-args=5
 
 [tool.mypy]
 mypy_path = 'stubs'

@@ -1,3 +1,19 @@
+# name: test_accepts_any_arg_for_bin_file
+  <class 'tuple'> (
+    Namespace(bin_args=[], bin_file='npm'),
+    <class 'list'> [
+      '--version',
+      '--help',
+    ],
+  )
+---
+# name: test_accepts_bin_file_arg
+  <class 'tuple'> (
+    Namespace(bin_args=[], bin_file='node'),
+    <class 'list'> [
+    ],
+  )
+---
 # name: test_fails_when_nvm_dir_not_available
   '
   Executing shim version 0.0.0
@@ -14,19 +30,9 @@
   Or set the environment variable 'NVSHIM_AUTO_INSTALL' to auto install at run time.
   '
 ---
-# name: test_accepts_any_arg_for_bin_file
-  <class 'tuple'> (
-    Namespace(bin_args=[], bin_file='npm'),
-    <class 'list'> [
-      '--version',
-      '--help',
-    ],
-  )
+# name: test_get_nvm_stable_version_returns_nothing_when_no_version_found
+  'Unable to retrieve stable version from nvm'
 ---
-# name: test_accepts_bin_file_arg
-  <class 'tuple'> (
-    Namespace(bin_args=[], bin_file='node'),
-    <class 'list'> [
-    ],
-  )
+# name: test_run_nvm_command_handles_failure_to_remove_tmp_file
+  'Unable to remove temporary nvm shim file'
 ---
