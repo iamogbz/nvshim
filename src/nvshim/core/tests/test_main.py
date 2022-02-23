@@ -38,7 +38,7 @@ def test_accepts_any_arg_for_bin_file(snapshot):
     snapshot.assert_match(parse_args(["npm", "--version", "--help"]))
 
 
-def test_fails_when_nvm_dir_not_available(capsys, snapshot):
+def test_fails_when_nvm_dir_not_available(capsys, snapshot, test_args):
     """Test main logic that when nvm dir is not available appropriate error is raised"""
     with process_env({EnvironmentVariable.VERBOSE.value: "true"}), pytest.raises(
         SystemExit
@@ -55,6 +55,7 @@ def test_fails_when_version_not_installed(
     mocker,
     capsys,
     snapshot,
+    test_args,
     test_nested_workspace_with_nvmrc,
     test_node_version_dir,
 ):
@@ -65,10 +66,6 @@ def test_fails_when_version_not_installed(
         autospec=True,
         return_value=test_nested_workspace_with_nvmrc,
     )
-    with open(
-        f"{test_nested_workspace_with_nvmrc}/.nvmrc", "w", encoding="UTF-8"
-    ) as nvmrc_file:
-        nvmrc_file.write("12.22.1")
     mock_env = {
         EnvironmentVariable.NVM_DIR.value: nvm_dir,
         **os.environ,
