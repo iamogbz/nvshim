@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import sys
+from bisect import bisect
 from typing import (
     Callable,
     Dict,
@@ -150,12 +151,38 @@ def parse_version(version: Optional[str]) -> Optional[semver.VersionInfo]:
     """
     if not version:
         return None
+    version_number = version[1:] if version.startswith("v") else version
     try:
-        return semver.VersionInfo.parse(
-            version[1:] if version.startswith("v") else version
-        )
+        return semver.VersionInfo.parse(version_number)
     except ValueError:
+        try:
+            return semver.VersionInfo.parse(f"{float(version_number)}.0")
+        except ValueError:
+            return None
+
+
+def match_version(
+    version: Optional[semver.VersionInfo], version_set: Tuple[str]
+) -> Optional[semver.VersionInfo]:
+    """
+    Find the closest matching semantic version in the version set
+    """
+    if not version:
         return None
+
+    is_patch_wildcard = not version.patch
+    is_minor_wildcard = is_patch_wildcard and not version.minor
+    is_major_wildcard = is_minor_wildcard and not version.major
+
+    version_sorted = sorted(
+        vi
+        for vi in (semver.VersionInfo.parse(v) for v in version_set)
+        if (is_major_wildcard or version.major == vi.major)
+        and (is_minor_wildcard or version.minor == vi.minor)
+        and (is_patch_wildcard or version.patch == vi.patch)
+    )
+    version_pos = max(0, bisect(version_sorted, version) - 1)
+    return version_sorted[version_pos] if len(version_sorted) > version_pos else version
 
 
 @functools.lru_cache(maxsize=None)
@@ -182,13 +209,19 @@ def resolve_alias(
 
 
 @functools.lru_cache(maxsize=None)
-def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> HashableDict[str, str]:
+def resolve_nvm_aliases(
+    nvm_aliases: AliasMapping, node_versions: Tuple[str]
+) -> HashableDict[str, str]:
     """
     Resolve all aliases in a mapping to their version info
     """
     resolved_aliases = HashableDict[str, str]()
     for alias, version in nvm_aliases.items():
-        version_info = parse_version(version) if isinstance(version, str) else None
+        version_info = (
+            match_version(parse_version(version), node_versions)
+            if isinstance(version, str)
+            else None
+        )
         version_info = (
             version_info if version_info else resolve_alias(version, nvm_aliases)[0]
         )
@@ -338,7 +371,7 @@ def get_bin_path(
     :return: path to the bin_file in the node version installation
     """
     resolved_nvm_aliases = (
-        resolve_nvm_aliases(nvm_aliases)
+        resolve_nvm_aliases(nvm_aliases, tuple(node_versions.keys()))
         if version not in node_versions
         and nvm_aliases.get(version) not in node_versions
         else HashableDict(
