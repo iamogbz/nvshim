@@ -5,14 +5,20 @@ import sys
 from pathlib import Path
 
 import pytest
+import semver
 
 from nvshim.core.__main__ import (
+    HashableDict,
+    HashableList,
     get_files,
+    get_nvm_aliases,
     get_nvm_stable_version,
     get_nvmrc,
     main,
+    match_version,
     parse_args,
     parse_version,
+    resolve_alias,
     run_nvm_cmd,
 )
 from nvshim.utils.environment import (
@@ -198,6 +204,26 @@ def test_get_nvm_stable_version_returns_nothing_when_no_version_found(
     assert snapshot == clean_output(captured.out)
 
 
+def test_get_nvm_stable_version_returns_correctly_when_no_version_found(mocker):
+    """Test correct handling of fetching alias version from nvm"""
+    test_nvm_dir = "/home/.nvm"
+    expected_version = "17.8.0"
+    mocked_run_nvm_cmd = mocker.patch(
+        "nvshim.core.__main__.run_nvm_cmd",
+        autospec=True,
+        return_value=subprocess.CompletedProcess(
+            None, 0, f"stable -> 17.8 (-> v{expected_version}) (default)\n"
+        ),
+    )
+    assert get_nvm_aliases(test_nvm_dir) == {
+        "default": "stable",
+        "stable": expected_version,
+    }
+    mocked_run_nvm_cmd.assert_called_with(
+        f"{test_nvm_dir}/nvm.sh", "alias  --no-colors", stdout=subprocess.PIPE
+    )
+
+
 def test_parse_version_handles_none_case():
     """Test parse version handles when version given is None"""
     assert parse_version(None) is None
@@ -210,3 +236,33 @@ def test_get_nvmrc_uses_raw_value_when_not_parseable(test_workspace):
     with open(nvmrc_path, "w", encoding="UTF-8") as open_file:
         open_file.write(non_parseable_version)
     assert get_nvmrc(nvmrc_path) == non_parseable_version
+
+
+def test_resolve_alias_handles_cycles():
+    """Test that resolving aliases can handle recursive references"""
+    mock_alias_mappings = HashableDict({"a": "b", "b": "c", "c": "a"})
+    result = resolve_alias("a", mock_alias_mappings)
+    assert result == (None, "a", HashableList(["a", "b", "c"]))
+
+
+def test_parse_version_returns_correct_values():
+    """Test limits of version parsing"""
+    assert parse_version("") is None
+    assert parse_version("1") is None
+    assert parse_version("v1") is None
+    assert parse_version("v1.0") is None
+    assert parse_version("v1.0") is None
+    assert parse_version("1.0.0") == semver.VersionInfo(1, 0, 0)
+    assert parse_version("v1.0.0") == semver.VersionInfo(1, 0, 0)
+
+
+def test_match_version_returns_correct_value():
+    """Test limits of matching version"""
+    version_set = ("0.0.0", "0.0.1", "1.0.0", "1.0.1", "1.1.0", "2.0.0")
+    assert match_version("alias", version_set) is None
+    assert match_version("", version_set) is None
+    assert match_version("3", version_set) is None
+    assert match_version("2", version_set) == semver.VersionInfo.parse("2.0.0")
+    assert match_version("1", version_set) == semver.VersionInfo.parse("1.1.0")
+    assert match_version("1.0", version_set) == semver.VersionInfo.parse("1.0.1")
+    assert match_version("0", version_set) == semver.VersionInfo.parse("0.0.1")

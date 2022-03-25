@@ -5,7 +5,6 @@ import os
 import re
 import subprocess
 import sys
-from bisect import bisect
 from typing import (
     Callable,
     Dict,
@@ -133,8 +132,8 @@ def get_nvm_aliases(nvm_dir: str, *, alias: Optional[str] = "") -> VersionMappin
         }
     )
 
-    if Alias.DEFAULT.value not in aliases and Alias.STABLE.value in aliases:
-        aliases[Alias.DEFAULT.value] = aliases[Alias.STABLE.value]
+    if Alias.DEFAULT.value not in aliases:
+        aliases[Alias.DEFAULT.value] = Alias.STABLE.value
 
     return aliases
 
@@ -202,37 +201,48 @@ def parse_version(version: Optional[str]) -> Optional[semver.VersionInfo]:
         return None
 
 
+def as_number(maybe_numeric: str) -> Tuple[Union[int, float, None], bool, bool]:
+    """
+    Attempt to parse string as numeric value
+
+    :returns: the number, is integer i.e. only major, is float i.e. no patch
+    """
+    try:
+        return int(maybe_numeric), True, True
+    except ValueError:
+        try:
+            return float(maybe_numeric), False, True
+        except ValueError:
+            return None, False, False
+
+
 def match_version(
     version_alias: str, version_set: Set[str]
 ) -> Optional[semver.VersionInfo]:
     """
     Find the closest matching semantic version in the version set
     """
-    version = parse_version(version_alias)
-    is_patch_wildcard = False
-    is_minor_wildcard = False
-    is_major_wildcard = False
-    if not version:
-        version = (
-            parse_version(f"{float(version_alias)}.0")
-            if version_alias.isnumeric()
-            else None
-        )
-        if not version:
+    plain_version = (
+        version_alias[1:] if version_alias.startswith("v") else version_alias
+    )
+    version = parse_version(plain_version)
+    if version:
+        is_minor_wildcard = False
+        is_patch_wildcard = False
+    else:
+        version_number, is_minor_wildcard, is_patch_wildcard = as_number(plain_version)
+        if version_number is None:
             return None
-        is_patch_wildcard = not version.patch
-        is_minor_wildcard = is_patch_wildcard and not version.minor
-        is_major_wildcard = is_minor_wildcard and not version.major
+        version = parse_version(f"{float(version_number)}.0")
 
     version_sorted = sorted(
         vi
         for vi in (semver.VersionInfo.parse(v) for v in version_set)
-        if (is_major_wildcard or version.major == vi.major)
+        if version.major == vi.major
         and (is_minor_wildcard or version.minor == vi.minor)
         and (is_patch_wildcard or version.patch == vi.patch)
     )
-    version_pos = max(0, bisect(version_sorted, version) - 1)
-    return version_sorted[version_pos] if len(version_sorted) > version_pos else None
+    return version_sorted.pop() if version_sorted else None
 
 
 @functools.lru_cache(maxsize=None)
@@ -256,24 +266,6 @@ def resolve_alias(
         return resolve_alias(alias_mapping.get(alias), alias_mapping, seen, seen_order)
 
     return parse_version(alias), alias, seen_order
-
-
-@functools.lru_cache(maxsize=None)
-def resolve_nvm_aliases(nvm_aliases: AliasMapping) -> VersionMapping:
-    """
-    Resolve all aliases in a mapping to their version info
-    """
-    resolved_aliases = VersionMapping()
-    for alias, version in nvm_aliases.items():
-        version_info = parse_version(version) if isinstance(version, str) else None
-        version_info = (
-            version_info if version_info else resolve_alias(version, nvm_aliases)[0]
-        )
-
-        if version_info:
-            resolved_aliases[alias] = str(version_info)
-
-    return resolved_aliases
 
 
 def get_node_versions_dir(nvm_dir: str) -> str:
@@ -311,24 +303,6 @@ def get_node_versions(node_versions_dir: str) -> VersionMapping:
             for v in map(parse_version, files)
         }
     )
-
-
-def merge_nvm_aliases_with_node_versions(
-    nvm_aliases: AliasMapping, node_versions: VersionMapping
-) -> VersionMapping:
-    """
-    Merge nvm aliases with node versions for aliases that resolved to detected node versions
-
-    :param nvm_aliases: resolved nvm aliases
-    :param node_versions: parsed node versions to bin folder path
-    :return: all aliases and versions to bin folder path
-    """
-    alias_versions = {
-        alias: node_versions[str(version)]
-        for alias, version in nvm_aliases.items()
-        if version in node_versions
-    }
-    return HashableDict({**alias_versions, **node_versions})
 
 
 def get_nvmrc_path(exec_dir: str) -> Optional[str]:
@@ -417,15 +391,13 @@ def get_bin_path(
     :return: path to the bin_file in the node version installation
     """
     if not version_installed:
-        if not environment.is_version_auto_install_enabled():
-            message.print_version_not_installed(version_alias, version)
-            sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
-
-        run_nvm_cmd(nvm_sh_path, f"install {version}")
-        installed_version = match_version(
-            version_alias=version,
-            version_set=set(get_node_versions(node_versions_dir).keys()),
-        )
+        installed_version = None
+        if environment.is_version_auto_install_enabled():
+            run_nvm_cmd(nvm_sh_path, f"install {version}")
+            installed_version = match_version(
+                version_alias=version,
+                version_set=set(get_node_versions(node_versions_dir).keys()),
+            )
         if not installed_version:
             message.print_version_not_installed(version_alias, version)
             sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
