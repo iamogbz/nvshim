@@ -1,5 +1,8 @@
 """nvshim constants"""
-from enum import IntEnum
+from enum import (
+    Enum,
+    IntEnum,
+)
 
 
 class ErrorCode(IntEnum):
@@ -12,3 +15,11 @@ class ErrorCode(IntEnum):
 
 
 shims = {"node", "npm", "npx"}
+
+
+class Alias(Enum):
+    """nvm alias names"""
+
+    DEFAULT = "default"
+    STABLE = "stable"
+    NODE = "node"
