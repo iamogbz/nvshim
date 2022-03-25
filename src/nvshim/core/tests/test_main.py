@@ -209,4 +209,4 @@ def test_get_nvmrc_uses_raw_value_when_not_parseable(test_workspace):
     non_parseable_version = "D902"
     with open(nvmrc_path, "w", encoding="UTF-8") as open_file:
         open_file.write(non_parseable_version)
-    assert get_nvmrc(nvmrc_path) == (non_parseable_version, False)
+    assert get_nvmrc(nvmrc_path) == non_parseable_version
