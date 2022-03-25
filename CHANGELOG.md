@@ -12,6 +12,13 @@ See open [issues](https://github.com/iamogbz/nvshim/issues)
 
 See closed [issues](https://github.com/iamogbz/nvshim/pulls?q=is%3Apr+is%3Amerged+sort%3Acreated-desc+-label%3Areleased)
 
+## [1.1.2](https://github.com/iamogbz/nvshim/compare/v1.1.1...v1.1.2) (2022-03-25)
+
+
+### Bug Fixes
+
+* version multi-step alias resolution ([#173](https://github.com/iamogbz/nvshim/issues/173)) ([5876047](https://github.com/iamogbz/nvshim/commit/587604798c98569f1a5ca4b6ce7a008c8f88805c))
+
 ## [1.1.1](https://github.com/iamogbz/nvshim/compare/v1.1.0...v1.1.1) (2022-02-23)
 
 
