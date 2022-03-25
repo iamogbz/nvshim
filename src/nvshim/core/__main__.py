@@ -33,25 +33,25 @@ from nvshim.utils.constants import (
     ErrorCode,
 )
 
-KeyType = TypeVar("KeyType")
-ValueType = TypeVar("ValueType")
+K = TypeVar("K")
+V = TypeVar("V")
 
 
-class HashableList(List[ValueType], Hashable):
+class HashableList(List[V], Hashable):
     """List that can be stored in a hash object"""
 
     def __hash__(self):
         return hash(frozenset(self))
 
 
-class HashableSet(Set[ValueType], Hashable):
+class HashableSet(Set[V], Hashable):
     """Set that can be stored in a hash object"""
 
     def __hash__(self):
         return hash(frozenset(self))
 
 
-class HashableDict(Dict[KeyType, ValueType], Hashable):
+class HashableDict(Dict[K, V], Hashable):
     """Dictionary that can be stored in a hash object"""
 
     def __hash__(self):
