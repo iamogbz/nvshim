@@ -62,5 +62,5 @@ make install
 ```
 
 ```sh
-make tests
+make tests a="--snapshot-update"
 ```
