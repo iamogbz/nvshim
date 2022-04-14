@@ -28,9 +28,18 @@ def _build():
 
 
 def _get_publish_command(*, dry_run: bool = True):
-    cmd = ["twine", "upload", "--skip-existing"]
+    cmd = ["twine", "upload", "--skip-existing", "--username", "__token__"]
     if dry_run:
-        cmd.extend(["--repository-url", "https://test.pypi.org/legacy/"])
+        cmd.extend(
+            [
+                "--password",
+                os.environ["TEST_PYPI_PUBLISH_TOKEN"],
+                "--repository-url",
+                "https://test.pypi.org/legacy/",
+            ]
+        )
+    else:
+        cmd.extend(["--password", os.environ["PYPI_PUBLISH_TOKEN"]])
     cmd.append(os.path.join(DIST_PATH, "*"))
     return cmd
 

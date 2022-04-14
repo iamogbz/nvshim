@@ -37,8 +37,8 @@ jobs:
     - name: Run release
       if:  github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
       env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        PYPI_PUBLISH_TOKEN: ${{ secrets.PYPI_PUBLISH_TOKEN }}
+        TEST_PYPI_PUBLISH_TOKEN: ${{ secrets.TEST_PYPI_PUBLISH_TOKEN }}
       run: |
         make deploy
   release:
