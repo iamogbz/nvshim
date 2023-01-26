@@ -10,7 +10,7 @@ from typing import (
 from setuptools import setup
 
 from src.nvshim import __version__ as PACKAGE_VERSION
-from src.nvshim.utils.constants import shims
+from src.nvshim.utils.constants import SHIMS as shims
 
 
 def readme() -> str:

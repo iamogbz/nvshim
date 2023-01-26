@@ -14,7 +14,7 @@ class ErrorCode(IntEnum):
     VERSION_NOT_INSTALLED = 1001
 
 
-shims = frozenset({"node", "npm", "npx"})
+SHIMS = frozenset({"node", "npm", "npx"})
 
 
 class Alias(Enum):
