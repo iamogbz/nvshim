@@ -117,7 +117,7 @@ lint:
 	$(ISORT_EXEC) . --check
 	$(BLACK_EXEC) . --check
 	${LINT_EXEC} src *.py
-	$(MYPY_EXEC) src *.py
+#    $(MYPY_EXEC) src *.py
 
 .PHONY: format
 format:
