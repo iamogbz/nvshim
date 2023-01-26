@@ -9,6 +9,7 @@ from typing import (
 
 from setuptools import setup
 
+from src.nvshim import __version__ as PACKAGE_VERSION
 from src.nvshim.utils.constants import shims
 
 
@@ -66,6 +67,8 @@ def get_requirements(filepath: str, visited: "List[str]") -> "List[str]":
 
 def version_scheme(version) -> str:
     """Convert version to version string"""
+    if not os.getenv("CI"):
+        return PACKAGE_VERSION
     if version.exact:
         return version.format_with("{tag}")
     return datetime.now().strftime("%Y.%m.%d.%H%M%S%f")
