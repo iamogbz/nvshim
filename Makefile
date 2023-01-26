@@ -1,3 +1,4 @@
+$(shell git update-index --assume-unchanged src/nvshim/__init__.py)
 $(shell test -s ".env" || cp ".env.example" ".env")
 ENVARS := $(shell cat ".env" | xargs)
 WITH_ENV = env $(ENVARS)
