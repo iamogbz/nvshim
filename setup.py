@@ -9,7 +9,9 @@ from typing import (
 
 from setuptools import setup
 
-from src.nvshim.utils.constants import shims
+from env import PACKAGE_SOURCE
+from nvshim import __version__ as PACKAGE_VERSION
+from nvshim.utils.constants import shims
 
 
 def readme() -> str:
@@ -17,7 +19,7 @@ def readme() -> str:
     return "\n".join(lines("README.md"))
 
 
-def lines(filepath) -> Iterator[str]:
+def lines(filepath) -> "Iterator[str]":
     """Lines of a file generator"""
     with open(filepath, encoding="UTF-8") as open_file:
         while True:
@@ -28,7 +30,7 @@ def lines(filepath) -> Iterator[str]:
                 return
 
 
-def get_requirements(filepath: str, visited: List[str]) -> List[str]:
+def get_requirements(filepath: str, visited: "List[str]") -> "List[str]":
     """
     Get all pip requirements specified by a requirements file
     with support for nested requirements files
@@ -37,7 +39,7 @@ def get_requirements(filepath: str, visited: List[str]) -> List[str]:
     :param visited: mutable list of visited requirements.txt files
     :return: unordered list of requirements without versions
     """
-    requirements: Set[str] = set()
+    requirements: "Set[str]" = set()
     filepath = os.path.realpath(filepath)
     rel_filepath = os.path.relpath(filepath)
 
@@ -66,6 +68,8 @@ def get_requirements(filepath: str, visited: List[str]) -> List[str]:
 
 def version_scheme(version) -> str:
     """Convert version to version string"""
+    if not os.getenv("CI"):
+        return PACKAGE_VERSION
     if version.exact:
         return version.format_with("{tag}")
     return datetime.now().strftime("%Y.%m.%d.%H%M%S%f")
@@ -101,7 +105,7 @@ setup(
     license="GNU",
     name="nvshim",
     packages=["nvshim", "nvshim.core", "nvshim.utils"],
-    package_dir={"": "src"},
+    package_dir={"": PACKAGE_SOURCE},
     python_requires=">=3",
     setup_requires=["setuptools_scm"],
     tests_require=get_requirements("requirements/test.txt", []),
@@ -109,7 +113,7 @@ setup(
     use_scm_version={
         "local_scheme": "no-local-version",
         "version_scheme": version_scheme,
-        "write_to": "./src/nvshim/__init__.py",
+        "write_to": f"{PACKAGE_SOURCE}/nvshim/__init__.py",
         "write_to_template": '"""Current package version"""\n__version__ = "{version}"\n',
     },
 )

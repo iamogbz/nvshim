@@ -16,7 +16,7 @@ from .message import (
 )
 
 
-def _include_venv(env: EnvDict):
+def _include_venv(env: "EnvDict"):
     path_key = "PATH"
     env_path = env.get(path_key, "")
     return {**env, path_key: f"venv/bin/:{env_path}"}

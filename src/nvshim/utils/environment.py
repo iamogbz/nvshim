@@ -19,12 +19,12 @@ class EnvironmentVariable(Enum):
 class MissingEnvironmentVariableError(Exception):
     """Error for missing environment variable"""
 
-    def __init__(self, env_var: EnvironmentVariable):
+    def __init__(self, env_var: "EnvironmentVariable"):
         super().__init__()
         self.env_var = env_var
 
 
-def _get_env_var(env_var: EnvironmentVariable, raise_missing: bool = False) -> object:
+def _get_env_var(env_var: "EnvironmentVariable", raise_missing: bool = False) -> object:
     try:
         return json.loads(os.environ[env_var.value])
     except KeyError as exc:
@@ -35,13 +35,13 @@ def _get_env_var(env_var: EnvironmentVariable, raise_missing: bool = False) -> o
         return os.environ.get(env_var.value)
 
 
-def _set_envs(values: EnvDict):
+def _set_envs(values: "EnvDict"):
     os.environ.clear()
     os.environ.update(**values)
 
 
 @contextmanager
-def process_env(env_vars: EnvDict):
+def process_env(env_vars: "EnvDict"):
     """Run code with specific enviroment variables that are reset afterwards"""
     prev_env_vars = {**os.environ}
     _set_envs(env_vars)

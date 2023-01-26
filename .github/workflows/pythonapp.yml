@@ -4,6 +4,8 @@ on:
     branches:
       - master
   pull_request:
+env:
+  CI: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,7 +48,7 @@ jobs:
     if:  github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
     steps:
       - uses: actions/checkout@v1
-      - uses: cycjimmy/semantic-release-action@v2
+      - uses: cycjimmy/semantic-release-action@v3
         with:
           branch: master
           dry_run: false
