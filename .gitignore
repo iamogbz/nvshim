@@ -1,6 +1,7 @@
 *.egg
 *.egg-info
 .eggs
+.env
 *.pyc
 .pytest_cache
 artifacts
