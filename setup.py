@@ -106,6 +106,7 @@ setup(
     setup_requires=["setuptools_scm"],
     tests_require=get_requirements("requirements/test.txt", []),
     url="http://github.com/iamogbz/nvshim",
+    # https://pypi.org/project/setuptools-scm/#configuration-parameters
     use_scm_version={
         "local_scheme": "no-local-version",
         "version_scheme": version_scheme,
