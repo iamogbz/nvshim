@@ -17,7 +17,7 @@ def readme() -> str:
     return "\n".join(lines("README.md"))
 
 
-def lines(filepath) -> Iterator[str]:
+def lines(filepath) -> "Iterator[str]":
     """Lines of a file generator"""
     with open(filepath, encoding="UTF-8") as open_file:
         while True:
@@ -28,7 +28,7 @@ def lines(filepath) -> Iterator[str]:
                 return
 
 
-def get_requirements(filepath: str, visited: List[str]) -> List[str]:
+def get_requirements(filepath: str, visited: "List[str]") -> "List[str]":
     """
     Get all pip requirements specified by a requirements file
     with support for nested requirements files
@@ -37,7 +37,7 @@ def get_requirements(filepath: str, visited: List[str]) -> List[str]:
     :param visited: mutable list of visited requirements.txt files
     :return: unordered list of requirements without versions
     """
-    requirements: Set[str] = set()
+    requirements: "Set[str]" = set()
     filepath = os.path.realpath(filepath)
     rel_filepath = os.path.relpath(filepath)
 

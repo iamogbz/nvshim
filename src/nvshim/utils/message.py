@@ -4,6 +4,7 @@ from enum import (
     IntEnum,
 )
 from subprocess import CalledProcessError
+from typing import Optional
 
 from colored import (
     fg,
@@ -31,7 +32,7 @@ class MessageLevel(IntEnum):
     QUIET = 0
 
 
-def _level() -> MessageLevel:
+def _level() -> "MessageLevel":
     """Minium threshold level for logging to occur"""
 
     return MessageLevel.QUIET if is_verbose_logging() else MessageLevel.NORMAL
@@ -44,11 +45,11 @@ def _print(*args, level=MessageLevel.NORMAL):
     print(*args)
 
 
-def _stylize(text: str, color: Color) -> str:
+def _stylize(text: str, color: "Color") -> str:
     return stylize(text, color.value)
 
 
-def _print_stylized(text: str, color: Color, level=MessageLevel.NORMAL):
+def _print_stylized(text: str, color: "Color", level=MessageLevel.NORMAL):
     _print(_stylize(text, color), level=level)
 
 
@@ -56,13 +57,13 @@ def _print_error(text: str):
     _print_stylized(text, Color.ERROR, MessageLevel.LOUD)
 
 
-def print_env_var_missing(env_var: EnvironmentVariable):
+def print_env_var_missing(env_var: "EnvironmentVariable"):
     """Print message for missing environment variable"""
     _print_error(f"Environment variable '{env_var.value}' missing")
 
 
 def print_using_version(
-    rc_version: str, version: str, bin_path: str, nvmrc_path: str = None
+    rc_version: str, version: str, bin_path: str, nvmrc_path: "Optional[str]" = None
 ):
     """Print message showing path of which .nvmrc is found and node version is used"""
     messages = (
@@ -106,17 +107,17 @@ def print_unable_to_get_alias_version(alias: str):
     _print_error(f"Unable to retrieve {alias} version from nvm")
 
 
-def print_process_interrupted(exc: KeyboardInterrupt):
+def print_process_interrupted(exc: "KeyboardInterrupt"):
     """Print error for interrupt handler"""
     _print(f"\nInterrupted. {exc}")
 
 
-def print_unable_to_run(exc: CalledProcessError):
+def print_unable_to_run(exc: "CalledProcessError"):
     """Print error for failed sub process run"""
     _print(str(exc), level=MessageLevel.QUIET)
 
 
-def print_unable_to_remove_nvm_shim_temp_file(exc: Exception):
+def print_unable_to_remove_nvm_shim_temp_file(exc: "Exception"):
     """Print error for failure to delete temp nvm exec shim file"""
     _print_error("Unable to remove temporary nvm shim file")
     _print(str(exc), level=MessageLevel.QUIET)

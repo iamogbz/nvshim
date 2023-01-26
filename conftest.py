@@ -4,6 +4,7 @@ import shutil
 import sys
 from typing import (
     Dict,
+    Optional,
     Union,
 )
 
@@ -11,7 +12,7 @@ import pytest
 
 __TEST_DIR__ = os.path.join(os.environ["PWD"], "tmp")
 __TEST_VERSION__ = "v14.5.0"
-__TEST_DIR_STRUCTURE__: Dict[str, Union[str, dict]] = {".nvmrc": __TEST_VERSION__}
+__TEST_DIR_STRUCTURE__: "Dict[str, Union[str, dict]]" = {".nvmrc": __TEST_VERSION__}
 __NVM_DIR__ = os.path.join(os.path.expanduser("~"), ".nvm")
 
 
@@ -24,8 +25,8 @@ def test_args():
     sys.argv = initial_args
 
 
-def _flatten_fs(base: str, structure: Dict[str, Union[str, dict]]):
-    flattened: Dict[str, Union[str, dict]] = {}
+def _flatten_fs(base: str, structure: "Dict[str, Union[str, dict]]"):
+    flattened: "Dict[str, Union[str, dict]]" = {}
     items = list(structure.items())
     while items:
         path, content = items.pop()
@@ -42,7 +43,7 @@ def _flatten_fs(base: str, structure: Dict[str, Union[str, dict]]):
     return flattened
 
 
-def _make_fs(base: str, structure: Dict[str, Union[str, dict]] = None):
+def _make_fs(base: str, structure: "Optional[Dict[str, Union[str, dict]]]" = None):
     os.makedirs(base, exist_ok=True)
     for file_path, content in _flatten_fs(base, structure or {}).items():
         content_type = type(content)
