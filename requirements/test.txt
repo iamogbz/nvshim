@@ -1,4 +1,4 @@
 pytest
-syrupy==3.0.4
+syrupy==3.0.6
 pyyaml==6.0
 pytest-mock==3.10.0
