@@ -35,7 +35,7 @@ Reads all configuration from the environment.
 
 ### [`NVM_DIR`](https://github.com/nvm-sh/nvm#installation-and-update)
 
-Relies on nvm being installed and configured correctly.
+Relies on `nvm` being installed and configured correctly.
 
 ### `NVSHIM_AUTO_INSTALL`
 
@@ -49,9 +49,13 @@ Otherwise set to `0` or `false` or nothing.
 
 ## Caveats
 
-To allow the `nvshim` installed `node` shim work in all directories, you'll need to stop sourcing `nvm.sh` in your shell rc i.e. `bash_profile`, `zshrc` etc. 
+1. To allow the `nvshim` installed `node` shim work in all directories, you'll need to stop sourcing `nvm.sh` in your shell rc i.e. `bash_profile`, `zshrc` etc. 
+   - Just comment out the `source /Users/me/.nvm/nvm.sh` in your shell startup script. This is optional and prevents `nvm` from taking control of your shell path on launch.
+   - With `nvm` shimmed, `nvm use` commands do not have any effect on the shell, the `node` version is already always gotten from the config automatically.
 
-Just comment out the `source /Users/me/.nvm/nvm.sh` in your shell startup script. This is optional and prevents `nvm` from taking control of your shell path on launch.
+1. The scope of this project only shims the `node`, `npm`, `npx` and `nvm` binaries. Any globally installed modules are not automatically shimmed.
+   - It is still easy to run a specific global bin e.g. `npx eslint` will alway run the version of `eslint` installed via the `node` version for the current shell.
+   - Indicate your interest in having this tool shim all binaries installed via node by leaving a comment [here](https://github.com/iamogbz/nvshim/issues/137).
 
 ## Contribution
 
