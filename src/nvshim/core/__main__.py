@@ -238,7 +238,8 @@ def match_version(
     version_sorted = sorted(
         vi
         for vi in (semver.VersionInfo.parse(v) for v in version_set)
-        if version.major == vi.major
+        if version
+        and version.major == vi.major
         and (is_minor_wildcard or version.minor == vi.minor)
         and (is_patch_wildcard or version.patch == vi.patch)
     )
@@ -401,7 +402,7 @@ def get_bin_path(
         if not installed_version:
             message.print_version_not_installed(version_alias, version)
             sys.exit(ErrorCode.VERSION_NOT_INSTALLED)
-        version = installed_version
+        version = str(installed_version)
 
     node_path = get_node_version_bin_dir(node_versions_dir, version=version)
     bin_path = os.path.join(node_path, bin_file)

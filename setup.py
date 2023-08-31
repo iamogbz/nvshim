@@ -1,5 +1,6 @@
 """Setup project file"""
 import os
+import sys
 from datetime import datetime
 from typing import (
     Iterator,
@@ -9,8 +10,14 @@ from typing import (
 
 from setuptools import setup
 
-from src.nvshim import __version__ as PACKAGE_VERSION
-from src.nvshim.utils.constants import SHIMS as shims
+# include nvshim src folder
+sys.path.append("./src")
+
+try:
+    from nvshim import __version__ as PACKAGE_VERSION
+    from nvshim.utils.constants import SHIMS as shims
+finally:
+    pass
 
 
 def readme() -> str:
